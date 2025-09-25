@@ -1,0 +1,2 @@
+- save state backups, just in case
+- key to finish game
