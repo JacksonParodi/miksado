@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 [ExternalTool("miksado")]
@@ -113,6 +114,8 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
     private int ShuffleRetryCount = 0;
     private LogLevel CurrentLogLevel;
 
+    private TwitchClient TwitchClient = null!;
+
     // constructor
     public MiksadoToolForm()
     {
@@ -122,9 +125,29 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
         LogConsoleDebug("miksado tool loaded");
 
         // twitch
-        TwitchClient twitchClient = new();
-        twitchClient.ConnectAsync().Wait();
+        TwitchClient = new();
+        TwitchClient.EventSubClient.ChannelChatMessage += async (s, e) =>
+        {
+            string t = e.Payload.Event.Message.Text;
+            LogConsoleDebug($"{t}");
+            if (t == "!shuffle")
+            {
+                ShouldShuffle = true;
+            }
+            await Task.CompletedTask;
+        };
 
+        TwitchClient.ConnectAsync().ContinueWith(task =>
+        {
+            if (task.IsFaulted)
+            {
+                LogConsoleInfo($"twitch connection error: {task.Exception?.GetBaseException().Message}");
+            }
+            else
+            {
+                LogConsoleDebug("twitch connected");
+            }
+        });
 
 
         // ensure directories exist
@@ -155,9 +178,9 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
         };
 
         // twitch
-        TwitchClient twitchClientt = new();
-        string authUrl = twitchClientt.GetAuthorizationUrl();
-        LogConsoleDebug($"twitch auth url: {authUrl}");
+        //TwitchClient twitchClientt = new();
+        //string authUrl = twitchClientt.GetAuthorizationUrl();
+        //LogConsoleDebug($"twitch auth url: {authUrl}");
 
         // setup rng model
         RngComboBox.Items.AddRange(System.Enum.GetNames(typeof(RandomNumberGeneratorModel)));
@@ -277,7 +300,9 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
     /// </summary>
     public override void Restart()
     {
-        LogConsoleDebug("miksado restarted");
+        LogConsoleDebug("miksado restarted!!!");
+        //LogConsoleDebug($"twitch connected: {TwitchClient._test}");
+
     }
 
     /// <summary>
@@ -285,6 +310,8 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
     /// </summary>
     protected override void UpdateAfter()
     {
+        //LogConsoleDebug($"twitch connected: {TwitchClient._test}");
+
         IGameInfo? info = APIs.Emulation.GetGameInfo();
         string gameTitleString;
         if (info == null)

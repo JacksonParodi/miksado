@@ -1,2 +1,10 @@
 - save state backups, just in case
 - key to finish game
+- twitch chat command to force shuffle
+- twitch chat command to pause shuffle operation
+- bits: minimum bits to shuffle
+- subs: minimum tier to shuffle
+- VITAL: cooldown interval setting
+- for twitch chat game control: broadcaster chat command to toggle
+- UI button to end game and remove from rotation
+- UI button to pause/resume shuffling
