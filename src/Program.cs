@@ -3,6 +3,7 @@
 using BizHawk.Client.Common;
 using BizHawk.Client.EmuHawk;
 using BizHawk.Emulation.Common;
+using Miksado.Twitch;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -120,6 +121,12 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
         ConsoleMultiline.Text = "";
         LogConsoleDebug("miksado tool loaded");
 
+        // twitch
+        TwitchClient twitchClient = new();
+        twitchClient.ConnectAsync().Wait();
+
+
+
         // ensure directories exist
         if (!Directory.Exists(MiksadoPath))
         {
@@ -146,6 +153,11 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
             CurrentLogLevel = DebugLogCheckBox.Checked ? LogLevel.Debug : LogLevel.Info;
             LogConsoleDebug($"log level set to {CurrentLogLevel}");
         };
+
+        // twitch
+        TwitchClient twitchClientt = new();
+        string authUrl = twitchClientt.GetAuthorizationUrl();
+        LogConsoleDebug($"twitch auth url: {authUrl}");
 
         // setup rng model
         RngComboBox.Items.AddRange(System.Enum.GetNames(typeof(RandomNumberGeneratorModel)));
