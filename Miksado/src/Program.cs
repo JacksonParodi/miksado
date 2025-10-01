@@ -2,6 +2,7 @@
 
 using BizHawk.Client.Common;
 using BizHawk.Client.EmuHawk;
+using Miksado.Misc;
 using Miksado.Plugin;
 using Miksado.Plugin.Shuffler;
 using Miksado.Twitch;
@@ -14,8 +15,13 @@ using System.Windows.Forms;
 using TwitchLib.Api.Helix.Models.EventSub;
 using TwitchLib.EventSub.Core.EventArgs.Channel;
 using TwitchLib.EventSub.Websockets.Core.EventArgs;
-using static Miksado.Constant.Constant;
+using static Miksado.Misc.Constant;
+using Button = System.Windows.Forms.Button;
+using CheckBox = System.Windows.Forms.CheckBox;
+using Label = System.Windows.Forms.Label;
 using LogLevel = Logger.Logger.LogLevel;
+using Panel = System.Windows.Forms.Panel;
+using TextBox = System.Windows.Forms.TextBox;
 
 // bug: force no debug logs at startup
 // todo: more aggressive rom file parsing, to not include non-rom files
@@ -36,12 +42,15 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
     private readonly Logger.Logger Logger;
     private readonly TwitchClient TwitchClient;
     private List<MiksadoPlugin> Plugins = [];
+    public MiksadoConfig MConfig;
 
     public MiksadoToolForm()
     {
         InitializeComponent();
         Logger = new(ConsoleMultiline);
         Logger.Info("miksado initializing...");
+
+        MConfig = MiksadoConfig.Load();
 
         MiksadoVersionLabel.Text = $"miksado v{MajorVersion}.{MinorVersion}.{PatchVersion} by jackson parodi";
 
@@ -71,7 +80,7 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
         TwitchClient.EventSubClient.ChannelBitsUse += OnBitsUse;
         TwitchClient.EventSubClient.ChannelPollEnd += OnPollEnd;
 
-        string[] paths = [MiksadoPath, MiksadoGamePath, MiksadoStatePath, MiksadoDataPath];
+        string[] paths = [MiksadoDirPath, MGameDirPath, MStateDirPath, MDataDirPath];
         foreach (string path in paths)
         {
             if (!Directory.Exists(path))
@@ -96,28 +105,36 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
     /// </summary>
     public override void Restart()
     {
+        // load plugins now in order to get the API container
         if (Plugins.Count == 0)
         {
             //ChatInputPlugin ChatInputPlugin = new(Logger, APIs);
-            ShufflerPlugin ShufflerPlugin = new(Logger, APIs);
+            PluginConfig? shufflerConfig = null;
+            foreach (PluginConfig pc in MConfig.PluginConfigs)
+            {
+                if (pc is ShufflerConfig)
+                {
+                    shufflerConfig = pc;
+                }
+            }
+            ShufflerPlugin ShufflerPlugin = new(Logger, APIs, shufflerConfig);
+
             Plugins = [ShufflerPlugin];
+            PluginSelectCheckedListBox.Items.Clear();
 
             foreach (MiksadoPlugin p in Plugins)
             {
                 RightDynamicPanel.Controls.Add(p.BaseUserControl);
                 p.BaseUserControl.Dock = DockStyle.Fill;
                 p.BaseUserControl.Visible = false;
-            }
+                PluginSelectCheckedListBox.Items.Add(p.PluginName, false);
 
-            //if (Plugins.Count > 0)
-            //{
-            //    Plugins[0].BaseUserControl.Visible = true;
-            //}
-
-            PluginSelectCheckedListBox.Items.Clear();
-            foreach (MiksadoPlugin plugin in Plugins)
-            {
-                PluginSelectCheckedListBox.Items.Add(plugin.PluginName, false);
+                p.PluginConfigChanged += () =>
+                {
+                    Logger.Debug("plugin config changed, saving config");
+                    MConfig.PluginConfigs = [.. Plugins.Select(p => p.PluginConfig)];
+                    MConfig.Save();
+                };
             }
 
             PluginSelectCheckedListBox.ItemCheck += (s, e) =>
@@ -155,6 +172,9 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
         {
             plugin.OnRestart();
         }
+
+        MConfig.PluginConfigs = [.. Plugins.Select(p => p.PluginConfig)];
+        MConfig.Save();
     }
 
     protected override void UpdateAfter()
@@ -368,6 +388,7 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
         // LeftSplitContainer
         // 
         this.LeftSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+        this.LeftSplitContainer.IsSplitterFixed = true;
         this.LeftSplitContainer.Location = new System.Drawing.Point(0, 0);
         this.LeftSplitContainer.Name = "LeftSplitContainer";
         this.LeftSplitContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -434,6 +455,7 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
         this.Controls.Add(this.RightDynamicPanel);
         this.Controls.Add(this.LeftSplitOriginalPanel);
         this.Controls.Add(this.ConsoleMultiline);
+        this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
         this.Name = "MiksadoToolForm";
         this.LeftSplitContainer.Panel1.ResumeLayout(false);
         this.LeftSplitContainer.Panel2.ResumeLayout(false);

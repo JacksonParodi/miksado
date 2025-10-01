@@ -1,26 +1,25 @@
 ﻿using Miksado.Plugin.Shuffler.Random;
-using System.Collections.Generic;
 
 namespace Miksado.Plugin.Shuffler.Shuffle
 {
     internal class NoImmediateRepeat : IShuffleAlgorithm
     {
-        public string NextGamePath(IRandomNumberGenerator rng, List<string> allGamePaths, string? currentGamePath)
+        public string NextGamePath(IRandomNumberGenerator rng, string[] allGamePaths, string? currentGamePath)
         {
             if (currentGamePath == null)
             {
-                return allGamePaths[rng.Next() % allGamePaths.Count];
+                return allGamePaths[rng.Next() % allGamePaths.Length];
             }
 
             int tryCount = 0;
 
             string newGamePath = currentGamePath;
 
-            while (newGamePath == currentGamePath && allGamePaths.Count > 1 && tryCount <= Constant.Constant.ShuffleRetryLimit)
+            while (newGamePath == currentGamePath && allGamePaths.Length > 1 && tryCount <= Misc.Constant.ShuffleRetryLimit)
             {
                 tryCount++;
                 int random = rng.Next();
-                newGamePath = allGamePaths[random % allGamePaths.Count];
+                newGamePath = allGamePaths[random % allGamePaths.Length];
             }
 
             // if newGamePath is still the same as currentGamePath, it means we have exhausted our retry limit

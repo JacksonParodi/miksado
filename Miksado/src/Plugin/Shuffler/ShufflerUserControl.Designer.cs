@@ -35,10 +35,11 @@ namespace Miksado
             this.MainTabPage = new System.Windows.Forms.TabPage();
             this.MainTabFlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.TransportButtonFlowLayout = new System.Windows.Forms.FlowLayoutPanel();
-            this.StartButton = new System.Windows.Forms.Button();
+            this.StartNewButton = new System.Windows.Forms.Button();
             this.ResumeButton = new System.Windows.Forms.Button();
             this.PauseUnpauseButton = new System.Windows.Forms.Button();
             this.ForceShuffleButton = new System.Windows.Forms.Button();
+            this.GameFinishButton = new System.Windows.Forms.Button();
             this.SeedFlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.SeedTextBoxLabel = new System.Windows.Forms.Label();
             this.SeedTextBox = new System.Windows.Forms.TextBox();
@@ -76,12 +77,14 @@ namespace Miksado
             this.PollTabPage = new System.Windows.Forms.TabPage();
             this.PollFlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.PollTitleTextBox = new System.Windows.Forms.TextBox();
+            this.PollOption12FlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.PollOption1FlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.PollOption1ComboBox = new System.Windows.Forms.ComboBox();
             this.PollOption1EnableCheckBox = new System.Windows.Forms.CheckBox();
             this.PollOption2FlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.PollOption2ComboBox = new System.Windows.Forms.ComboBox();
             this.PollOption2EnableCheckBox = new System.Windows.Forms.CheckBox();
+            this.PollOption34FlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.PollOption3FlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.PollOption3ComboBox = new System.Windows.Forms.ComboBox();
             this.PollOption3EnableCheckBox = new System.Windows.Forms.CheckBox();
@@ -121,8 +124,6 @@ namespace Miksado
             this.RedemptionTitleFlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.TwitchRedemptionTitleTextBox = new System.Windows.Forms.TextBox();
             this.RedemptionTitleLabel = new System.Windows.Forms.Label();
-            this.PollOption12FlowLayout = new System.Windows.Forms.FlowLayoutPanel();
-            this.PollOption34FlowLayout = new System.Windows.Forms.FlowLayoutPanel();
             this.ShufflerTabControl.SuspendLayout();
             this.MainTabPage.SuspendLayout();
             this.MainTabFlowLayout.SuspendLayout();
@@ -145,8 +146,10 @@ namespace Miksado
             this.TwitchSubFlowLayout.SuspendLayout();
             this.PollTabPage.SuspendLayout();
             this.PollFlowLayout.SuspendLayout();
+            this.PollOption12FlowLayout.SuspendLayout();
             this.PollOption1FlowLayout.SuspendLayout();
             this.PollOption2FlowLayout.SuspendLayout();
+            this.PollOption34FlowLayout.SuspendLayout();
             this.PollOption3FlowLayout.SuspendLayout();
             this.PollOption4FlowLayout.SuspendLayout();
             this.PollOption5FlowLayout.SuspendLayout();
@@ -165,8 +168,6 @@ namespace Miksado
             this.RedemptionTabPage.SuspendLayout();
             this.TwitchRedeemFlowLayout.SuspendLayout();
             this.RedemptionTitleFlowLayout.SuspendLayout();
-            this.PollOption12FlowLayout.SuspendLayout();
-            this.PollOption34FlowLayout.SuspendLayout();
             this.SuspendLayout();
             // 
             // ShufflerTabControl
@@ -213,24 +214,25 @@ namespace Miksado
             // 
             // TransportButtonFlowLayout
             // 
-            this.TransportButtonFlowLayout.Controls.Add(this.StartButton);
+            this.TransportButtonFlowLayout.Controls.Add(this.StartNewButton);
             this.TransportButtonFlowLayout.Controls.Add(this.ResumeButton);
             this.TransportButtonFlowLayout.Controls.Add(this.PauseUnpauseButton);
             this.TransportButtonFlowLayout.Controls.Add(this.ForceShuffleButton);
+            this.TransportButtonFlowLayout.Controls.Add(this.GameFinishButton);
             this.TransportButtonFlowLayout.Location = new System.Drawing.Point(3, 3);
             this.TransportButtonFlowLayout.Name = "TransportButtonFlowLayout";
-            this.TransportButtonFlowLayout.Size = new System.Drawing.Size(410, 55);
+            this.TransportButtonFlowLayout.Size = new System.Drawing.Size(517, 55);
             this.TransportButtonFlowLayout.TabIndex = 18;
             // 
             // StartButton
             // 
-            this.StartButton.Enabled = false;
-            this.StartButton.Location = new System.Drawing.Point(3, 3);
-            this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(80, 32);
-            this.StartButton.TabIndex = 2;
-            this.StartButton.Text = "new";
-            this.StartButton.UseVisualStyleBackColor = true;
+            this.StartNewButton.Enabled = false;
+            this.StartNewButton.Location = new System.Drawing.Point(3, 3);
+            this.StartNewButton.Name = "StartButton";
+            this.StartNewButton.Size = new System.Drawing.Size(80, 32);
+            this.StartNewButton.TabIndex = 2;
+            this.StartNewButton.Text = "new";
+            this.StartNewButton.UseVisualStyleBackColor = true;
             // 
             // ResumeButton
             // 
@@ -260,6 +262,15 @@ namespace Miksado
             this.ForceShuffleButton.TabIndex = 1;
             this.ForceShuffleButton.Text = "force shuffle";
             this.ForceShuffleButton.UseVisualStyleBackColor = true;
+            // 
+            // GameFinishButton
+            // 
+            this.GameFinishButton.Location = new System.Drawing.Point(347, 3);
+            this.GameFinishButton.Name = "GameFinishButton";
+            this.GameFinishButton.Size = new System.Drawing.Size(75, 32);
+            this.GameFinishButton.TabIndex = 5;
+            this.GameFinishButton.Text = "finish game";
+            this.GameFinishButton.UseVisualStyleBackColor = true;
             // 
             // SeedFlowLayout
             // 
@@ -655,6 +666,15 @@ namespace Miksado
             this.PollTitleTextBox.TabIndex = 6;
             this.PollTitleTextBox.Text = "_POLL_TITLE_";
             // 
+            // PollOption12FlowLayout
+            // 
+            this.PollOption12FlowLayout.Controls.Add(this.PollOption1FlowLayout);
+            this.PollOption12FlowLayout.Controls.Add(this.PollOption2FlowLayout);
+            this.PollOption12FlowLayout.Location = new System.Drawing.Point(3, 29);
+            this.PollOption12FlowLayout.Name = "PollOption12FlowLayout";
+            this.PollOption12FlowLayout.Size = new System.Drawing.Size(425, 55);
+            this.PollOption12FlowLayout.TabIndex = 24;
+            // 
             // PollOption1FlowLayout
             // 
             this.PollOption1FlowLayout.Controls.Add(this.PollOption1ComboBox);
@@ -706,6 +726,15 @@ namespace Miksado
             this.PollOption2EnableCheckBox.Size = new System.Drawing.Size(15, 14);
             this.PollOption2EnableCheckBox.TabIndex = 14;
             this.PollOption2EnableCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // PollOption34FlowLayout
+            // 
+            this.PollOption34FlowLayout.Controls.Add(this.PollOption3FlowLayout);
+            this.PollOption34FlowLayout.Controls.Add(this.PollOption4FlowLayout);
+            this.PollOption34FlowLayout.Location = new System.Drawing.Point(3, 90);
+            this.PollOption34FlowLayout.Name = "PollOption34FlowLayout";
+            this.PollOption34FlowLayout.Size = new System.Drawing.Size(425, 67);
+            this.PollOption34FlowLayout.TabIndex = 25;
             // 
             // PollOption3FlowLayout
             // 
@@ -1116,24 +1145,6 @@ namespace Miksado
             this.RedemptionTitleLabel.TabIndex = 12;
             this.RedemptionTitleLabel.Text = "redemption name";
             // 
-            // PollOption12FlowLayout
-            // 
-            this.PollOption12FlowLayout.Controls.Add(this.PollOption1FlowLayout);
-            this.PollOption12FlowLayout.Controls.Add(this.PollOption2FlowLayout);
-            this.PollOption12FlowLayout.Location = new System.Drawing.Point(3, 29);
-            this.PollOption12FlowLayout.Name = "PollOption12FlowLayout";
-            this.PollOption12FlowLayout.Size = new System.Drawing.Size(425, 55);
-            this.PollOption12FlowLayout.TabIndex = 24;
-            // 
-            // PollOption34FlowLayout
-            // 
-            this.PollOption34FlowLayout.Controls.Add(this.PollOption3FlowLayout);
-            this.PollOption34FlowLayout.Controls.Add(this.PollOption4FlowLayout);
-            this.PollOption34FlowLayout.Location = new System.Drawing.Point(3, 90);
-            this.PollOption34FlowLayout.Name = "PollOption34FlowLayout";
-            this.PollOption34FlowLayout.Size = new System.Drawing.Size(425, 67);
-            this.PollOption34FlowLayout.TabIndex = 25;
-            // 
             // ShufflerUserControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1175,10 +1186,12 @@ namespace Miksado
             this.PollTabPage.ResumeLayout(false);
             this.PollFlowLayout.ResumeLayout(false);
             this.PollFlowLayout.PerformLayout();
+            this.PollOption12FlowLayout.ResumeLayout(false);
             this.PollOption1FlowLayout.ResumeLayout(false);
             this.PollOption1FlowLayout.PerformLayout();
             this.PollOption2FlowLayout.ResumeLayout(false);
             this.PollOption2FlowLayout.PerformLayout();
+            this.PollOption34FlowLayout.ResumeLayout(false);
             this.PollOption3FlowLayout.ResumeLayout(false);
             this.PollOption3FlowLayout.PerformLayout();
             this.PollOption4FlowLayout.ResumeLayout(false);
@@ -1208,8 +1221,6 @@ namespace Miksado
             this.TwitchRedeemFlowLayout.PerformLayout();
             this.RedemptionTitleFlowLayout.ResumeLayout(false);
             this.RedemptionTitleFlowLayout.PerformLayout();
-            this.PollOption12FlowLayout.ResumeLayout(false);
-            this.PollOption34FlowLayout.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1242,7 +1253,7 @@ namespace Miksado
         public Button PauseUnpauseButton;
         public Label RNGLabel;
         public ComboBox AlgorithmComboBox;
-        public Button StartButton;
+        public Button StartNewButton;
         public NumericUpDown CooldownUpDown;
         public NumericUpDown TwitchBitsMinimumUpDown;
         public CheckBox TwitchBitsEnableCheckBox;
@@ -1306,7 +1317,8 @@ namespace Miksado
         public FlowLayoutPanel TwitchRedeemFlowLayout;
         public FlowLayoutPanel RedemptionTitleFlowLayout;
         public Label RedemptionTitleLabel;
-        private FlowLayoutPanel PollOption12FlowLayout;
-        private FlowLayoutPanel PollOption34FlowLayout;
+        public FlowLayoutPanel PollOption12FlowLayout;
+        public FlowLayoutPanel PollOption34FlowLayout;
+        public Button GameFinishButton;
     }
 }

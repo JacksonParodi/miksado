@@ -1,4 +1,5 @@
 ﻿using BizHawk.Client.Common;
+using Miksado.Misc;
 using Miksado.Plugin.Shuffler.Random;
 using Miksado.Plugin.Shuffler.Shuffle;
 using Miksado.Plugin.Shuffler.Trigger;
@@ -8,9 +9,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using TwitchLib.EventSub.Core.EventArgs.Channel;
 using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
-using MConstant = Miksado.Constant.Constant;
+using MConstant = Miksado.Misc.Constant;
 
 namespace Miksado.Plugin.Shuffler
 {
@@ -28,14 +30,19 @@ namespace Miksado.Plugin.Shuffler
         public static readonly ShuffleTrigger[] DefaultShuffleTriggers = [ShuffleTrigger.Timer];
 
         public ShufflerUserControl UserControl => (ShufflerUserControl)BaseUserControl;
+        public ShufflerConfig ShufflerConfig => (ShufflerConfig)PluginConfig;
+        private Dictionary<string, ShufflerGameInfo> _gameInfoMap = [];
+        private Dictionary<string, ShufflerGameInfo> GameInfoMap
+        {
+            get => _gameInfoMap;
+            set => _gameInfoMap = value;
+        }
+
         private IRandomNumberGenerator CurrentRng;
         private IShuffleAlgorithm CurrentShuffleAlgorithm;
         private ShuffleTrigger[] CurrentShuffleTriggers;
         private bool ShouldShuffle = false;
         private bool IsShuffling = false;
-        private readonly Dictionary<string, string> GameStateMap = [];
-        private readonly List<string> AllGames = [];
-        private readonly List<string> AllStates = [];
         private string? CurrentGamePath = null;
         private System.Timers.Timer? ShufflerTimer;
         private DateTime lastTimerTargetTime;
@@ -49,13 +56,73 @@ namespace Miksado.Plugin.Shuffler
         private bool IsInactive() => _state == ShufflerState.Inactive;
         private bool IsPausedSession() => _state == ShufflerState.Paused;
 
-        public ShufflerPlugin(Logger.Logger logger, ApiContainer APIs) : base(logger, APIs)
+        public ShufflerPlugin(Logger.Logger logger, ApiContainer APIs, PluginConfig? pluginConfig) : base(logger, APIs, pluginConfig)
         {
-            // TODO: add random option to each poll option combobox
-
             BaseUserControl = new ShufflerUserControl();
             SetState(ShufflerState.Inactive);
             PluginName = "game shuffler";
+
+            switch (pluginConfig == null)
+            {
+                case true:
+                    PluginConfig = new ShufflerConfig();
+
+                    // if no provided map from config, build a new one
+                    // load games and states
+                    string[] rawGameFiles = Directory.GetFiles(MConstant.MGameDirPath, "*", SearchOption.AllDirectories);
+                    string[] allGames = [.. rawGameFiles.Where(filePath => !MConstant.InvalidGameExtensions.Contains(Path.GetExtension(filePath).ToLower()))];
+                    Logger.Debug($"found {allGames.Length} valid game files");
+
+                    foreach (string gamePath in allGames)
+                    {
+                        string gameFileName = Path.GetFileNameWithoutExtension(gamePath);
+                        Logger.Debug($"game file: {gameFileName}");
+                    }
+
+                    string[] rawStateFiles = Directory.GetFiles(MConstant.MStateDirPath, "*", SearchOption.AllDirectories);
+                    string[] allStates = [.. rawStateFiles.Where(filePath => Path.GetFileName(filePath).StartsWith(MConstant.SaveStatePrefix))];
+                    Logger.Debug($"found {allStates.Length} valid state files");
+
+                    GameInfoMap.Clear();
+                    foreach (string gamePath in allGames)
+                    {
+                        string gameFileName = Path.GetFileNameWithoutExtension(gamePath);
+                        string? statePathForThisGame = null;
+                        foreach (string path in allStates)
+                        {
+                            string stateFileName = Path.GetFileNameWithoutExtension(path);
+
+                            if (stateFileName.StartsWith(MConstant.SaveStatePrefix) && stateFileName.EndsWith(gameFileName))
+                            {
+                                statePathForThisGame = path;
+                                break;
+                            }
+                        }
+                        ShufflerGameInfo info = new()
+                        {
+                            GamePath = gamePath,
+                        };
+                        if (statePathForThisGame != null)
+                        {
+                            info.StatePath = statePathForThisGame;
+                        }
+                        GameInfoMap[Path.GetFileNameWithoutExtension(gamePath)] = info;
+                    }
+
+                    Logger.Debug($"mapped {GameInfoMap.Count} game files");
+                    FirePluginConfigChanged();
+                    break;
+
+                case false:
+                    PluginConfig = pluginConfig;
+                    if (pluginConfig is ShufflerConfig config)
+                    {
+                        GameInfoMap.Clear();
+                        GameInfoMap = config.GameInfoMap;
+                        // maybe validate the provided map?
+                    }
+                    break;
+            }
 
             // setup rng
             UserControl.RngComboBox.Items.AddRange(RngFactory.GetAvailableRngNames());
@@ -193,50 +260,17 @@ namespace Miksado.Plugin.Shuffler
             };
             UserControl.TimerProgressBar.Visible = UserControl.ShowProgressBarCheckBox.Checked;
 
-            // load games and states
-            string[] rawGameFiles = Directory.GetFiles(MConstant.MiksadoGamePath, "*", SearchOption.AllDirectories);
-            AllGames = [.. rawGameFiles.Where(filePath => !MConstant.InvalidGameExtensions.Contains(Path.GetExtension(filePath).ToLower()))];
-
-            Logger.Debug($"found {AllGames.Count} valid game files");
-
-            foreach (string gamePath in AllGames)
-            {
-                string gameFileName = Path.GetFileNameWithoutExtension(gamePath);
-                Logger.Debug($"game file: {gameFileName}");
-            }
-
-            string[] rawStateFiles = Directory.GetFiles(MConstant.MiksadoStatePath, "*", SearchOption.AllDirectories);
-            AllStates = [.. rawStateFiles.Where(filePath => Path.GetFileName(filePath).StartsWith(MConstant.SaveStatePrefix))];
-
-            Logger.Debug($"found {AllStates.Count} valid state files");
-
-            foreach (string gamePath in AllGames)
-            {
-                foreach (string statePath in AllStates)
-                {
-                    string gameFileName = Path.GetFileNameWithoutExtension(gamePath);
-                    string stateFileName = Path.GetFileNameWithoutExtension(statePath);
-
-                    if (stateFileName.StartsWith(MConstant.SaveStatePrefix) && stateFileName.EndsWith(gameFileName))
-                    {
-                        GameStateMap[gamePath] = statePath;
-                        break;
-                    }
-                }
-            }
-            Logger.Debug($"mapped {GameStateMap.Count} game files to state files");
-
             // basic validate game files
-            if (AllGames.Count == 0)
+            if (GameInfoMap.Count == 0)
             {
                 Logger.Info("no valid game files found, tool will not function");
-                UserControl.StartButton.Enabled = false;
+                UserControl.StartNewButton.Enabled = false;
                 UserControl.ResumeButton.Enabled = false;
                 UserControl.ForceShuffleButton.Enabled = false;
                 return;
             }
 
-            if (AllGames.Count == 1)
+            if (GameInfoMap.Count == 1)
             {
                 Logger.Info("only one valid game file found, shuffling will have no effect");
             }
@@ -248,10 +282,31 @@ namespace Miksado.Plugin.Shuffler
                 UserControl.ChannelPointVoteCostUpDown.Enabled = UserControl.ChannelPointVotingEnableCheckBox.Checked;
             };
 
-            UserControl.StartButton.Click += OnStartButtonClick;
+            UserControl.StartNewButton.Click += OnStartNewButtonClick;
             UserControl.ResumeButton.Click += OnResumeButtonClick;
             UserControl.PauseUnpauseButton.Click += OnPauseUnpauseButtonClick;
             UserControl.ForceShuffleButton.Click += OnForceShuffleButtonClick;
+            UserControl.GameFinishButton.Click += OnGameFinishButtonClick;
+            UserControl.PollSendButton.Click += OnPollSendButtonClick;
+            UserControl.PollEndButton.Click += OnPollEndButtonClick;
+            UserControl.PollClearButton.Click += OnPollClearButtonClick;
+
+            ComboBox[] pollOptionComboBoxes = [
+                UserControl.PollOption1ComboBox,
+                UserControl.PollOption2ComboBox,
+                UserControl.PollOption3ComboBox,
+                UserControl.PollOption4ComboBox,
+                UserControl.PollOption5ComboBox,
+            ];
+
+            foreach (ComboBox cb in pollOptionComboBoxes)
+            {
+                cb.Items.Clear();
+                cb.Items.AddRange([.. GameInfoMap.Values.Select(info => Path.GetFileNameWithoutExtension(info.GamePath))]);
+                cb.Items.Add("random");
+                cb.SelectedIndex = -1;
+                // continue implementing poll options later
+            }
 
             UpdateUI();
         }
@@ -260,13 +315,21 @@ namespace Miksado.Plugin.Shuffler
         {
             if (IsShuffling)
             {
-                Logger.Debug("already shuffling");
+                Logger.Info("already shuffling");
                 return;
             }
 
             if (lastShuffleTime + TimeSpan.FromSeconds((double)UserControl.CooldownUpDown.Value) > DateTime.Now)
             {
                 Logger.Info("cooldown active, skipping shuffle");
+                return;
+            }
+
+            if (IsAllGamesCompleted())
+            {
+                Logger.Info("all games completed, cannot shuffle");
+                SetState(ShufflerState.Inactive);
+                UpdateUI();
                 return;
             }
 
@@ -278,50 +341,61 @@ namespace Miksado.Plugin.Shuffler
                 // I don't want to call OpenRom from anywhere else
                 // I'd rather modify the logic to force a certain next game
 
-                if (APIs.Emulation.GetGameInfo != null)
+                // if we have a current playing game, save the state for it
+                if (APIs.Emulation.GetGameInfo != null && CurrentGamePath != null)
                 {
-                    string newStateStatePath = Path.Combine(
-                        MConstant.MiksadoStatePath,
-                        $"{MConstant.SaveStatePrefix}{Path.GetFileNameWithoutExtension(CurrentGamePath)}.state"
-                        );
-                    Logger.Debug($"saving state to: {newStateStatePath}");
-                    APIs.SaveState.Save(newStateStatePath);
-                    if (CurrentGamePath != null)
-                    {
-                        GameStateMap[CurrentGamePath] = newStateStatePath;
-                    }
+                    string newStatePath = GetSaveStatePath(CurrentGamePath);
+                    Logger.Debug($"saving state to: {newStatePath}");
+                    APIs.SaveState.Save(newStatePath);
+                    GameInfoMap[Path.GetFileNameWithoutExtension(CurrentGamePath)].StatePath = newStatePath;
                 }
 
-                bool shuffleWorked = false;
+                bool shuffleSuccessful = false;
                 string nextGamePath = "";
+                string[] availableGamePaths = [.. GameInfoMap.Values.Where(info => !info.IsCompleted).Select(info => info.GamePath)];
 
-                while (!shuffleWorked)
+                if (availableGamePaths.Length == 0)
                 {
-                    nextGamePath = CurrentShuffleAlgorithm.NextGamePath(CurrentRng, AllGames, CurrentGamePath);
+                    Logger.Info("no available games to shuffle to for some reason");
+                    SetState(ShufflerState.Inactive);
+                    UpdateUI();
+                    return;
+                }
+
+                while (!shuffleSuccessful)
+                {
+                    nextGamePath = CurrentShuffleAlgorithm.NextGamePath(CurrentRng, availableGamePaths, CurrentGamePath);
                     Logger.Debug($"next game path: {nextGamePath}");
-                    shuffleWorked = APIs.EmuClient.OpenRom(nextGamePath);
-                    if (!shuffleWorked)
+                    shuffleSuccessful = APIs.EmuClient.OpenRom(nextGamePath);
+
+                    if (!shuffleSuccessful)
                     {
-                        AllGames.Remove(nextGamePath);
-                        Logger.Error($"failed to load game: {nextGamePath}, picking new game");
+                        GameInfoMap = GameInfoMap.Where(kv => kv.Value.GamePath != nextGamePath).ToDictionary(kv => kv.Key, kv => kv.Value);
+                        Logger.Error($"failed to load game: {nextGamePath}, removing from GameInfoMap");
                     }
                 }
 
                 lastShuffleTime = DateTime.Now;
+                GameInfoMap[Path.GetFileNameWithoutExtension(nextGamePath)].LastPlayed = lastShuffleTime;
                 CurrentGamePath = nextGamePath;
-                Logger.Debug($"loaded random game: {Path.GetFileNameWithoutExtension(CurrentGamePath)}");
+                Logger.Debug($"loaded new game: {Path.GetFileNameWithoutExtension(CurrentGamePath)}");
 
-                if (GameStateMap.ContainsKey(CurrentGamePath))
+                if (GameInfoMap[Path.GetFileNameWithoutExtension(CurrentGamePath)].StatePath == GetSaveStatePath(CurrentGamePath))
                 {
-                    string statePath = GameStateMap[CurrentGamePath];
-                    Logger.Debug($"loading state: {Path.GetFileName(statePath)}");
-                    APIs.SaveState.Load(statePath);
+                    string? saveStatePath = GameInfoMap[Path.GetFileNameWithoutExtension(CurrentGamePath)].StatePath;
+                    if (saveStatePath != null)
+                    {
+                        Logger.Debug($"loading state: {Path.GetFileName(saveStatePath)}");
+                        bool _loadSaveStateSuccessful = APIs.SaveState.Load(saveStatePath);
+                    }
                 }
 
                 else
                 {
                     Logger.Debug("no save state found for this game, starting fresh");
                 }
+
+                UpdateUI();
             }
             catch (System.Exception ex)
             {
@@ -363,6 +437,8 @@ namespace Miksado.Plugin.Shuffler
             }
 
             IsShuffling = false;
+
+            SaveShufflerConfig();
         }
 
         private void BeginSession()
@@ -409,15 +485,16 @@ namespace Miksado.Plugin.Shuffler
             }
 
             UpdateUI();
-
             ShouldShuffle = true;
         }
 
         public override void UpdateUI()
         {
-            UserControl.StartButton.Enabled = !IsActiveSession() && Enabled;
+            UserControl.StartNewButton.Enabled = !IsActiveSession() && Enabled;
 
-            if (GameStateMap.Count > 0 && !IsActiveSession() && Enabled)
+            bool isAtLeastOneSaveState = GameInfoMap.Values.Any(info => info.StatePath != null && File.Exists(info.StatePath));
+
+            if (GameInfoMap.Count > 0 && isAtLeastOneSaveState && !IsActiveSession() && Enabled)
             {
                 UserControl.ResumeButton.Enabled = true;
             }
@@ -426,7 +503,7 @@ namespace Miksado.Plugin.Shuffler
                 UserControl.ResumeButton.Enabled = false;
             }
 
-            UserControl.ForceShuffleButton.Enabled = AllGames.Count > 1 && IsActiveSession() && Enabled;
+            UserControl.ForceShuffleButton.Enabled = GameInfoMap.Count > 1 && IsActiveSession() && Enabled;
 
             UserControl.PauseUnpauseButton.Enabled = !IsInactive() && Enabled;
             if (IsActiveSession())
@@ -441,6 +518,8 @@ namespace Miksado.Plugin.Shuffler
             {
                 UserControl.PauseUnpauseButton.Text = "...";
             }
+
+            UserControl.GameFinishButton.Enabled = IsActiveSession() && Enabled && !IsAllGamesCompleted();
 
             UserControl.RngComboBox.Enabled = !IsActiveSession();
             UserControl.AlgorithmComboBox.Enabled = !IsActiveSession();
@@ -507,6 +586,28 @@ namespace Miksado.Plugin.Shuffler
             Logger.Debug($"current shuffle triggers: {string.Join(", ", CurrentShuffleTriggers)}");
         }
 
+        private string GetSaveStatePath(string gamePath)
+        {
+            return Path.Combine(MConstant.MStateDirPath, GetSaveStateFileName(gamePath));
+        }
+
+        private string GetSaveStateFileName(string gamePath)
+        {
+            string gameFileName = Path.GetFileNameWithoutExtension(gamePath);
+            return $"{MConstant.SaveStatePrefix}{gameFileName}.state";
+        }
+
+        private bool IsAllGamesCompleted()
+        {
+            return GameInfoMap.Values.All(info => info.IsCompleted);
+        }
+
+        private void SaveShufflerConfig()
+        {
+            ShufflerConfig.GameInfoMap = GameInfoMap;
+            FirePluginConfigChanged();
+        }
+
         public override void OnRestart()
         {
             Logger.Debug("shuffler plugin restarted");
@@ -514,6 +615,13 @@ namespace Miksado.Plugin.Shuffler
 
         public override void OnUpdateAfter()
         {
+            if (!Initialized)
+            {
+                Initialized = true;
+                Logger.Debug("shuffler plugin initialized");
+                FirePluginConfigChanged();
+            }
+
             if (
                 CurrentShuffleTriggers.Contains(ShuffleTrigger.Timer) &&
                 ShufflerTimer != null &&
@@ -536,20 +644,25 @@ namespace Miksado.Plugin.Shuffler
             }
         }
 
-        private void OnStartButtonClick(object sender, System.EventArgs e)
+        private void OnStartNewButtonClick(object sender, System.EventArgs e)
         {
-            foreach (string file in Directory.GetFiles(MConstant.MiksadoStatePath))
+            foreach (string file in Directory.GetFiles(MConstant.MStateDirPath))
             {
                 File.Delete(file);
             }
-            foreach (string dir in Directory.GetDirectories(MConstant.MiksadoStatePath))
+            foreach (string dir in Directory.GetDirectories(MConstant.MStateDirPath))
             {
                 Directory.Delete(dir, true);
             }
 
+            foreach (var key in GameInfoMap.Keys.ToList())
+            {
+                GameInfoMap[key].IsCompleted = false;
+                GameInfoMap[key].LastPlayed = DateTime.MinValue;
+                GameInfoMap[key].StatePath = null;
+            }
+
             Logger.Debug("start button clicked");
-            // it crashes here, there's something wrong with using the API container outside the entry point class
-            Logger.Debug($"shuffler current sysid: {APIs.Emulation.GetSystemId()}");
             BeginSession();
         }
 
@@ -840,6 +953,7 @@ namespace Miksado.Plugin.Shuffler
             Logger.Debug("OnBitsUse processing complete");
             await Task.CompletedTask;
         }
+
         async public override Task OnPollEnd(ChannelPollEndArgs e)
         {
             if (!IsActiveSession() || !Enabled)
@@ -850,6 +964,46 @@ namespace Miksado.Plugin.Shuffler
 
             Logger.Debug("OnPollEnd called");
             await Task.CompletedTask;
+        }
+
+        private void OnPollClearButtonClick(object sender, EventArgs e)
+        {
+            return;
+        }
+
+        private void OnPollEndButtonClick(object sender, EventArgs e)
+        {
+            return;
+        }
+
+        private void OnPollSendButtonClick(object sender, EventArgs e)
+        {
+            return;
+        }
+
+        private void OnGameFinishButtonClick(object sender, EventArgs e)
+        {
+            if (!IsActiveSession() || !Enabled)
+            {
+                return;
+            }
+
+            GameInfoMap[Path.GetFileNameWithoutExtension(CurrentGamePath)].IsCompleted = true;
+            Logger.Info($"marked game {Path.GetFileNameWithoutExtension(CurrentGamePath)} as completed");
+            SaveShufflerConfig();
+
+            if (IsAllGamesCompleted())
+            {
+                ShouldShuffle = false;
+                Logger.Info("all games completed!");
+                SetState(ShufflerState.Inactive);
+                UpdateUI();
+            }
+            else
+            {
+                Logger.Info("shuffling to next game");
+                ShouldShuffle = true;
+            }
         }
     }
 }

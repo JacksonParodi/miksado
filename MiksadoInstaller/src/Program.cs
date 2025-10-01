@@ -101,6 +101,7 @@
                 ShowError("failed to create run script: " + ex.Message);
             }
 
+            Directory.Delete(LibDir, true);
             return;
         }
 

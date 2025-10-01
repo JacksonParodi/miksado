@@ -10,7 +10,7 @@ namespace Miksado.Plugin.Shuffler.Shuffle
         // when full, empty the bag and start again
         private readonly List<string> _bag = [];
 
-        public string NextGamePath(IRandomNumberGenerator rng, List<string> allGamePaths, string? currentGamePath)
+        public string NextGamePath(IRandomNumberGenerator rng, string[] allGamePaths, string? currentGamePath)
         {
             // as it is, bag algo can repeat a game if it is the only one left and then the first game of the new bag
             if (currentGamePath != null)
@@ -19,7 +19,7 @@ namespace Miksado.Plugin.Shuffler.Shuffle
             }
 
             // might be better to make sure each element of both arrays are the same
-            if (_bag.Count == allGamePaths.Count && _bag.All(allGamePaths.Contains))
+            if (_bag.Count == allGamePaths.Length && _bag.All(allGamePaths.Contains))
             {
                 _bag.Clear();
             }
