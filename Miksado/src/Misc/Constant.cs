@@ -17,6 +17,6 @@ namespace Miksado.Misc
 
         public static readonly int MajorVersion = 0;
         public static readonly int MinorVersion = 1;
-        public static readonly int PatchVersion = 0;
+        public static readonly int PatchVersion = 1;
     }
 }
