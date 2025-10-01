@@ -1,22 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
 	<PropertyGroup>
 		<LangVersion>12.0</LangVersion>
 		<Nullable>enable</Nullable>
 		<TargetFramework>net48</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
-		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
 		<MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
+	
 	<PropertyGroup Condition=" '$(BIZHAWK_HOME)' == '' ">
 		<BIZHAWK_HOME>$(ProjectDir)../BizHawk/output/</BIZHAWK_HOME>
 		<!-- if building EmuHawk from source, point to e.g. `$(ProjectDir)../BizHawk/output/` -->
 	</PropertyGroup>
+	
 	<PropertyGroup Condition=" '$(BIZHAWK_DATA_HOME)' == '' ">
 		<BIZHAWK_DATA_HOME>$(BIZHAWK_HOME)</BIZHAWK_DATA_HOME>
 		<!-- ignore this; on NixOS these are different dirs -->
 	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(OUTPUT_BUILD_DIR)' == '' ">
+		<OUTPUT_BUILD_DIR>$(ProjectDir)../o/</OUTPUT_BUILD_DIR>
+	</PropertyGroup>
+	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
@@ -29,8 +35,18 @@
 		<Reference Include="BizHawk.Common" HintPath="$(BIZHAWK_HOME)dll/BizHawk.Common.dll" />
 		<Reference Include="BizHawk.Emulation.Common" HintPath="$(BIZHAWK_HOME)dll/BizHawk.Emulation.Common.dll" />
 		<Reference Include="BizHawk.WinForms.Controls" HintPath="$(BIZHAWK_HOME)dll/BizHawk.WinForms.Controls.dll" />
+		<Reference Include="System.Web">
+		  <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\System.Web.dll</HintPath>
+		</Reference>
 	</ItemGroup>
+	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="$(OutputPath)Miksado.dll" DestinationFolder="$(BIZHAWK_DATA_HOME)ExternalTools" />
+		<ItemGroup>
+			<LibrariesToCopy Include="$(OutputPath)*.dll" Exclude="$(OutputPath)*Bizhawk*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(LibrariesToCopy)" DestinationFolder="$(OUTPUT_BUILD_DIR)miksado_lib" />
 	</Target>
+	
 </Project>
+
+

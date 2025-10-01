@@ -1,4 +1,4 @@
-﻿namespace Miksado.Random
+﻿namespace Miksado.Plugin.Shuffler.Random
 {
     internal interface IRandomNumberGenerator
     {

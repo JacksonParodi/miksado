@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<LangVersion>12.0</LangVersion>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net48</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(OUTPUT_BUILD_DIR)' == '' ">
+		<OUTPUT_BUILD_DIR>$(ProjectDir)../o/</OUTPUT_BUILD_DIR>
+	</PropertyGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<ItemGroup>
+			<ExeToCopy Include="$(OutputPath)*.exe" />
+		</ItemGroup>
+		<Copy SourceFiles="@(ExeToCopy)" DestinationFolder="$(OUTPUT_BUILD_DIR)" />
+	</Target>
+	
+</Project>

@@ -1,4 +1,4 @@
-﻿namespace Miksado.Random
+﻿namespace Miksado.Plugin.Shuffler.Random
 {
     internal class MajoraRng : IRandomNumberGenerator
     {
@@ -37,6 +37,10 @@
             long temp = (long)(_seed * Mult) + Inc;
             temp = temp % int.MaxValue;
             _seed = (int)temp;
+            if (_seed < 0)
+            {
+                _seed = -1 * _seed;
+            }
             return _seed;
         }
     }
