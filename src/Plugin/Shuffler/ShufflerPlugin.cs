@@ -292,10 +292,20 @@ namespace Miksado.Plugin.Shuffler
                     }
                 }
 
-                string nextGamePath = CurrentShuffleAlgorithm.NextGamePath(CurrentRng, AllGames, CurrentGamePath);
-                Logger.Debug($"next game path: {nextGamePath}");
-                APIs.EmuClient.OpenRom(nextGamePath);
-                lastShuffleTime = DateTime.Now;
+                bool shuffleWorked = false;
+                string nextGamePath = "";
+                while (!shuffleWorked)
+                {
+					nextGamePath = CurrentShuffleAlgorithm.NextGamePath(CurrentRng, AllGames, CurrentGamePath);
+					Logger.Debug($"next game path: {nextGamePath}");
+					shuffleWorked = APIs.EmuClient.OpenRom(nextGamePath);
+                    if (!shuffleWorked)
+                    {
+                        AllGames.Remove(nextGamePath);
+						Logger.Error($"failed to load game: {nextGamePath}, picking new game");
+					}
+				}
+				lastShuffleTime = DateTime.Now;
                 CurrentGamePath = nextGamePath;
                 Logger.Debug($"loaded random game: {Path.GetFileNameWithoutExtension(CurrentGamePath)}");
 
