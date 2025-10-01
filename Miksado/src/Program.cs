@@ -80,7 +80,7 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
             }
         }
 
-        DebugLogCheckBox.Checked = Logger.CurrentLogLevel == LogLevel.Info;
+        DebugLogCheckBox.Checked = Logger.CurrentLogLevel == LogLevel.Debug;
         DebugLogCheckBox.CheckedChanged += (s, e) =>
         {
             Logger.CurrentLogLevel = DebugLogCheckBox.Checked ? LogLevel.Debug : LogLevel.Info;
@@ -109,13 +109,16 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
                 p.BaseUserControl.Visible = false;
             }
 
+            //if (Plugins.Count > 0)
+            //{
+            //    Plugins[0].BaseUserControl.Visible = true;
+            //}
+
             PluginSelectCheckedListBox.Items.Clear();
             foreach (MiksadoPlugin plugin in Plugins)
             {
                 PluginSelectCheckedListBox.Items.Add(plugin.PluginName, false);
             }
-
-            Plugins[1].BaseUserControl.Visible = true;
 
             PluginSelectCheckedListBox.ItemCheck += (s, e) =>
             {
@@ -145,6 +148,8 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
                 Logger.Info("active plugins: " + string.Join(", ", Plugins.Where(p => p.Enabled).Select(p => p.PluginName)));
             };
         }
+
+        PluginSelectCheckedListBox.SetItemChecked(0, true);
 
         foreach (MiksadoPlugin plugin in Plugins.Where(p => p.Enabled))
         {
