@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchLib.Api.Helix", "..\T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchLib.Api.Helix.Models", "..\TwitchLib.Api-master\TwitchLib.Api.Helix.Models\TwitchLib.Api.Helix.Models.csproj", "{1AABF187-E424-E332-8E7A-63625696FFCC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiksadoInstaller", "..\MiksadoInstaller\MiksadoInstaller.csproj", "{C0CC46D9-7AFD-4563-85C0-A3E937A51603}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiksadoInstaller", "..\..\MiksadoInstaller\src\MiksadoInstaller.csproj", "{0F61683C-1262-D3CF-E6CE-8D2285475E34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,10 +59,10 @@ Global
 		{1AABF187-E424-E332-8E7A-63625696FFCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AABF187-E424-E332-8E7A-63625696FFCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AABF187-E424-E332-8E7A-63625696FFCC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C0CC46D9-7AFD-4563-85C0-A3E937A51603}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C0CC46D9-7AFD-4563-85C0-A3E937A51603}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C0CC46D9-7AFD-4563-85C0-A3E937A51603}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C0CC46D9-7AFD-4563-85C0-A3E937A51603}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F61683C-1262-D3CF-E6CE-8D2285475E34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F61683C-1262-D3CF-E6CE-8D2285475E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F61683C-1262-D3CF-E6CE-8D2285475E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F61683C-1262-D3CF-E6CE-8D2285475E34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

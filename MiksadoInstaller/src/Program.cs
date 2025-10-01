@@ -12,6 +12,14 @@
         private static readonly string RunScriptPath = Path.GetFullPath("run_miksado.bat");
         private static readonly bool IsDebugMode = true;
 
+        // readme notes:
+        // games must be placed in miksado/game
+        // extract in BizHawk base directory
+        // optionally run with created run_miksado.bat script
+        // in Bizhawk, externaltools -> miksado to run
+        // specify bizhawk version
+        // maybe create ExternalTools if not exists?
+
         private static void Main()
         {
             if (IsDebugMode)

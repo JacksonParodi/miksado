@@ -1,1 +1,0 @@
-ilrepack /parallel /out:..\..\..\..\BizHawk\output\ExternalTools\Miksado.dll .\Miksado.dll

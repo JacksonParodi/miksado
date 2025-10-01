@@ -3,7 +3,6 @@
 using BizHawk.Client.Common;
 using BizHawk.Client.EmuHawk;
 using Miksado.Plugin;
-using Miksado.Plugin.ChatInput;
 using Miksado.Plugin.Shuffler;
 using Miksado.Twitch;
 using System;
@@ -17,6 +16,12 @@ using TwitchLib.EventSub.Core.EventArgs.Channel;
 using TwitchLib.EventSub.Websockets.Core.EventArgs;
 using static Miksado.Constant.Constant;
 using LogLevel = Logger.Logger.LogLevel;
+
+// bug: force no debug logs at startup
+// todo: more aggressive rom file parsing, to not include non-rom files
+// todo: button to complete a game
+// todo: rescan folder button
+// todo: add socket trigger
 
 [ExternalTool("miksado")]
 public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
@@ -93,9 +98,9 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
     {
         if (Plugins.Count == 0)
         {
-            ChatInputPlugin ChatInputPlugin = new(Logger, APIs);
+            //ChatInputPlugin ChatInputPlugin = new(Logger, APIs);
             ShufflerPlugin ShufflerPlugin = new(Logger, APIs);
-            Plugins = [ChatInputPlugin, ShufflerPlugin];
+            Plugins = [ShufflerPlugin];
 
             foreach (MiksadoPlugin p in Plugins)
             {

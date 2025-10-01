@@ -10,7 +10,7 @@
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(BIZHAWK_HOME)' == '' ">
-		<BIZHAWK_HOME>$(ProjectDir)../BizHawk/output/</BIZHAWK_HOME>
+		<BIZHAWK_HOME>$(ProjectDir)../../BizHawk/output/</BIZHAWK_HOME>
 		<!-- if building EmuHawk from source, point to e.g. `$(ProjectDir)../BizHawk/output/` -->
 	</PropertyGroup>
 	
@@ -20,7 +20,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(OUTPUT_BUILD_DIR)' == '' ">
-		<OUTPUT_BUILD_DIR>$(ProjectDir)../o/</OUTPUT_BUILD_DIR>
+		<OUTPUT_BUILD_DIR>$(ProjectDir)../../o/</OUTPUT_BUILD_DIR>
 	</PropertyGroup>
 	
 	<ItemGroup>
@@ -39,6 +39,10 @@
 		  <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\System.Web.dll</HintPath>
 		</Reference>
 	</ItemGroup>
+	
+	<Target Name="RemoveDirectories">
+		<RemoveDir Directories="$(OUTPUT_BUILD_DIR)" />
+	</Target>
 	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<ItemGroup>

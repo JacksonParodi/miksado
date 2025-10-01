@@ -1,1 +1,0 @@
-start BizHawk\output\EmuHawk.exe --open-ext-tool-dll=Miksado
