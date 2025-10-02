@@ -20,7 +20,7 @@ game shuffles can be triggered by:
 ## installation
 
 1. download release zip or build solution
-2. highly recommended to use a fresh install of BizHawk 2.11
+2. highly recommended to use a fresh install of [BizHawk 2.11](https://github.com/TASEmulators/BizHawk/releases/tag/2.11)
 3. unzip contents into BizHawk base directory
 4. run MiksadoInstaller.exe
 5. start using miksado
