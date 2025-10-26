@@ -47,7 +47,7 @@ namespace TwitchLib.Api.Helix
 
             if (ids != null && ids.Count > 0)
                 getParams.AddRange(ids.Select(id => new KeyValuePair<string, string>("id", id)));
-            
+
             if (!string.IsNullOrWhiteSpace(after))
                 getParams.Add(new KeyValuePair<string, string>("after", after));
 

@@ -1,5 +1,6 @@
 ﻿using BizHawk.Client.Common;
 using Miksado.Misc;
+using Miksado.Twitch;
 
 namespace Miksado.Plugin.ChatInput
 {
@@ -7,7 +8,7 @@ namespace Miksado.Plugin.ChatInput
     {
         public ChatInputUserControl UserControl => (ChatInputUserControl)BaseUserControl;
 
-        public ChatInputPlugin(Logger.Logger logger, ApiContainer APIs, PluginConfig? pluginConfig) : base(logger, APIs, pluginConfig)
+        public ChatInputPlugin(Logger.Logger logger, ApiContainer APIs, TwitchClient TwitchClient, PluginConfig? pluginConfig) : base(logger, APIs, TwitchClient, pluginConfig)
         {
             BaseUserControl = new ChatInputUserControl();
             PluginName = "chat input";

@@ -22,6 +22,10 @@
 	<PropertyGroup Condition=" '$(OUTPUT_BUILD_DIR)' == '' ">
 		<OUTPUT_BUILD_DIR>$(ProjectDir)../../o/</OUTPUT_BUILD_DIR>
 	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(BIZHAWK_DIST_DIR)' == '' ">
+		<BIZHAWK_DIST_DIR>$(ProjectDir)../../BizHawk_dist/</BIZHAWK_DIST_DIR>
+	</PropertyGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
@@ -40,15 +44,43 @@
 		</Reference>
 	</ItemGroup>
 	
+	<!-- copy to dist directory -->
+	
 	<Target Name="RemoveDirectories">
 		<RemoveDir Directories="$(OUTPUT_BUILD_DIR)" />
 	</Target>
 	
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	<Target Name="PostBuild_Output" AfterTargets="PostBuildEvent">
 		<ItemGroup>
 			<LibrariesToCopy Include="$(OutputPath)*.dll" Exclude="$(OutputPath)*Bizhawk*.dll" />
 		</ItemGroup>
 		<Copy SourceFiles="@(LibrariesToCopy)" DestinationFolder="$(OUTPUT_BUILD_DIR)miksado_lib" />
+	</Target>
+
+	<!-- copy to local test source-built directory -->
+
+	<Target Name="RemoveDirectories">
+		<RemoveDir Directories="$(BIZHAWK_HOME)ExternalTools" />
+	</Target>
+
+	<Target Name="PostBuild_LocalBizTest" AfterTargets="PostBuildEvent">
+		<ItemGroup>
+			<LibrariesToCopy Include="$(OutputPath)*.dll" Exclude="$(OutputPath)*Bizhawk*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(LibrariesToCopy)" DestinationFolder="$(BIZHAWK_HOME)ExternalTools" />
+	</Target>
+
+	<!-- copy to local test Bizhawk dist directory -->
+
+	<Target Name="RemoveDirectories">
+		<RemoveDir Directories="$(BIZHAWK_DIST_DIR)ExternalTools" />
+	</Target>
+
+	<Target Name="PostBuild_BizDistDir" AfterTargets="PostBuildEvent">
+		<ItemGroup>
+			<LibrariesToCopy Include="$(OutputPath)*.dll" Exclude="$(OutputPath)*Bizhawk*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(LibrariesToCopy)" DestinationFolder="$(BIZHAWK_DIST_DIR)ExternalTools" />
 	</Target>
 	
 </Project>

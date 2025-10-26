@@ -192,7 +192,7 @@ namespace TwitchLib.Api.Helix
         }
 
         #endregion
-        
+
         #region GetFollowedChannels
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace TwitchLib.Api.Helix
         {
             if (string.IsNullOrWhiteSpace(userId))
                 throw new BadParameterException("userId must be set");
-            
+
             if (first < 1 || first > 100)
                 throw new BadParameterException("first cannot be less than 1 or greater than 100");
 
@@ -224,19 +224,19 @@ namespace TwitchLib.Api.Helix
             {
                 new KeyValuePair<string, string>("user_id", userId)
             };
-            
+
             if (!string.IsNullOrWhiteSpace(broadcasterId))
                 getParams.Add(new KeyValuePair<string, string>("broadcaster_id", broadcasterId));
             if (first != 20)
                 getParams.Add(new KeyValuePair<string, string>("first", first.ToString()));
             if (!string.IsNullOrWhiteSpace(after))
                 getParams.Add(new KeyValuePair<string, string>("after", after));
-            
+
             return TwitchGetGenericAsync<GetFollowedChannelsResponse>("/channels/followed", ApiVersion.Helix, getParams, accessToken);
         }
 
         #endregion
-        
+
         #region GetChannelFollowers
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace TwitchLib.Api.Helix
         {
             if (string.IsNullOrWhiteSpace(broadcasterId))
                 throw new BadParameterException("broadcasterId must be set");
-            
+
             if (first < 1 || first > 100)
                 throw new BadParameterException("first cannot be less than 1 or greater than 100");
 
@@ -265,14 +265,14 @@ namespace TwitchLib.Api.Helix
             {
                 new KeyValuePair<string, string>("broadcaster_id", broadcasterId)
             };
-            
+
             if (!string.IsNullOrWhiteSpace(userId))
                 getParams.Add(new KeyValuePair<string, string>("user_id", userId));
             if (first != 20)
                 getParams.Add(new KeyValuePair<string, string>("first", first.ToString()));
             if (!string.IsNullOrWhiteSpace(after))
                 getParams.Add(new KeyValuePair<string, string>("after", after));
-            
+
             return TwitchGetGenericAsync<GetChannelFollowersResponse>("/channels/followers", ApiVersion.Helix, getParams, accessToken);
         }
 

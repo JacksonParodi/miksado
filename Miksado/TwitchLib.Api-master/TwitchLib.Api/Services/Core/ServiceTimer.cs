@@ -16,7 +16,7 @@ namespace TwitchLib.Api.Services.Core
             _serviceTimerTickAsyncCallback = serviceTimerTickAsyncCallback;
             Interval = intervalInSeconds * 1000;
             IntervalInSeconds = intervalInSeconds;
-            Elapsed += async ( sender, e ) => await TimerElapsedAsync(sender, e);
+            Elapsed += async (sender, e) => await TimerElapsedAsync(sender, e);
         }
 
         private async Task TimerElapsedAsync(object sender, ElapsedEventArgs e)

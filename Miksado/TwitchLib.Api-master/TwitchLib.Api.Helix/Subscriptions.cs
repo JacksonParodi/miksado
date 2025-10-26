@@ -59,7 +59,7 @@ namespace TwitchLib.Api.Helix
         {
             if (string.IsNullOrWhiteSpace(broadcasterId))
                 throw new BadParameterException("BroadcasterId must be set");
-            
+
             if (userIds == null || userIds.Count == 0)
                 throw new BadParameterException("UserIds must be set contain at least one user id");
 
@@ -97,7 +97,7 @@ namespace TwitchLib.Api.Helix
                 new KeyValuePair<string, string>("first", first.ToString())
             };
 
-            if (!string.IsNullOrWhiteSpace(after)) 
+            if (!string.IsNullOrWhiteSpace(after))
                 getParams.Add(new KeyValuePair<string, string>("after", after));
 
             return TwitchGetGenericAsync<GetBroadcasterSubscriptionsResponse>("/subscriptions", ApiVersion.Helix, getParams, accessToken);

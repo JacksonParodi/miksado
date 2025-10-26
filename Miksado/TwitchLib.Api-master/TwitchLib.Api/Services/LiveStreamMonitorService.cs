@@ -49,8 +49,8 @@ namespace TwitchLib.Api.Services
         /// <param name="api">The api used to query information.</param>
         /// <param name="checkIntervalInSeconds"></param>
         /// <param name="maxStreamRequestCountPerRequest"></param>
-        public LiveStreamMonitorService(ITwitchAPI api, int checkIntervalInSeconds = 60, int maxStreamRequestCountPerRequest = 100) : 
-            base (api, checkIntervalInSeconds)
+        public LiveStreamMonitorService(ITwitchAPI api, int checkIntervalInSeconds = 60, int maxStreamRequestCountPerRequest = 100) :
+            base(api, checkIntervalInSeconds)
         {
             if (maxStreamRequestCountPerRequest < 1 || maxStreamRequestCountPerRequest > 100)
                 throw new ArgumentException("Twitch doesn't support less than 1 or more than 100 streams per request.", nameof(maxStreamRequestCountPerRequest));
@@ -103,10 +103,12 @@ namespace TwitchLib.Api.Services
 
         protected override async Task OnServiceTimerTick()
         {
-            try {
+            try
+            {
                 await base.OnServiceTimerTick();
                 await UpdateLiveStreamersAsync();
-            } catch {}
+            }
+            catch { }
         }
 
         private void HandleLiveStreamUpdate(string channel, Stream liveStream, bool callEvents)

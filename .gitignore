@@ -2,6 +2,7 @@
 **/obj
 temp/
 BizHawk/
+BizHawk_dist/
 o/
 
 ## Ignore Visual Studio temporary files, build results, and

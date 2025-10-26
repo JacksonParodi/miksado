@@ -178,17 +178,17 @@ namespace TwitchLib.Api.Helix
                 getParams.Add(new KeyValuePair<string, string>("status", status));
             }
 
-            if(!string.IsNullOrWhiteSpace(sort))
+            if (!string.IsNullOrWhiteSpace(sort))
             {
                 getParams.Add(new KeyValuePair<string, string>("sort", sort));
             }
 
-            if(!string.IsNullOrWhiteSpace(after))
+            if (!string.IsNullOrWhiteSpace(after))
             {
                 getParams.Add(new KeyValuePair<string, string>("after", after));
             }
 
-            if(!string.IsNullOrWhiteSpace(first))
+            if (!string.IsNullOrWhiteSpace(first))
             {
                 getParams.Add(new KeyValuePair<string, string>("first", first));
             }

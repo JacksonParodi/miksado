@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Threading.Tasks;
 using TwitchLib.Api.Core;
 using TwitchLib.Api.Core.Enums;
 using TwitchLib.Api.Core.Interfaces;

@@ -35,7 +35,7 @@ namespace TwitchLib.Api.Helix
         public Task<GetPollsResponse> GetPollsAsync(string broadcasterId, List<string> ids = null, string after = null, int first = 20, string accessToken = null)
         {
             var getParams = new List<KeyValuePair<string, string>>
-            { 
+            {
                 new KeyValuePair<string, string>("broadcaster_id", broadcasterId),
                 new KeyValuePair<string, string>("first", first.ToString())
             };

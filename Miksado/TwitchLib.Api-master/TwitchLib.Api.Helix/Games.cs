@@ -35,8 +35,8 @@ namespace TwitchLib.Api.Helix
         /// <exception cref="BadParameterException"></exception>
         public Task<GetGamesResponse> GetGamesAsync(List<string> gameIds = null, List<string> gameNames = null, List<string> igdbIds = null, string accessToken = null)
         {
-            if (gameIds == null && gameNames == null && igdbIds == null 
-                || gameIds != null && gameIds.Count == 0 && gameNames == null && igdbIds == null 
+            if (gameIds == null && gameNames == null && igdbIds == null
+                || gameIds != null && gameIds.Count == 0 && gameNames == null && igdbIds == null
                 || gameNames != null && gameNames.Count == 0 && gameIds == null && igdbIds == null
                 || igdbIds != null && igdbIds.Count == 0 && gameIds == null && gameNames == null)
                 throw new BadParameterException("Either gameIds, gameNames or igdbIds must have at least one value");

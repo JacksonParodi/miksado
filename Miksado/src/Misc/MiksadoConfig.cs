@@ -39,6 +39,12 @@ namespace Miksado.Misc
             };
 
             string serialized = JsonSerializer.Serialize(wrapper, options);
+
+            if (!File.Exists(Constant.MDataDirPath))
+            {
+                Directory.CreateDirectory(Constant.MDataDirPath);
+            }
+
             File.WriteAllText(Constant.MConfigFilePath, serialized);
         }
 

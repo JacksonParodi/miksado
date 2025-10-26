@@ -56,7 +56,7 @@ namespace TwitchLib.Api.Core.Undocumented
         /// <exception cref="BadResourceException"></exception>
         public async Task<bool> IsUsernameAvailableAsync(string username)
         {
-            var getParams = new List<KeyValuePair<string, string>> {new KeyValuePair<string, string>("users_service", "true")};
+            var getParams = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("users_service", "true") };
             var resp = await RequestReturnResponseCode($"https://passport.twitch.tv/usernames/{username}", "HEAD", getParams).ConfigureAwait(false);
             switch (resp)
             {

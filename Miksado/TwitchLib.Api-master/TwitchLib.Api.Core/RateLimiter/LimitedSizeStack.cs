@@ -2,7 +2,7 @@
 
 namespace TwitchLib.Api.Core.RateLimiter
 {
-    public class LimitedSizeStack<T>: LinkedList<T>
+    public class LimitedSizeStack<T> : LinkedList<T>
     {
         private readonly int _maxSize;
         public LimitedSizeStack(int maxSize)

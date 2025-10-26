@@ -9,7 +9,7 @@ namespace TwitchLib.Api.Auth
 
         [JsonProperty(PropertyName = "refresh_token")]
         public string RefreshToken { get; protected set; }
-        
+
         [JsonProperty(PropertyName = "expires_in")]
         public int ExpiresIn { get; protected set; }
 

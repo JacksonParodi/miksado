@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TwitchLib.Api.Helix.Models.Channels.GetChannelFollowers;
-using TwitchLib.Api.Helix.Models.Users.GetUserFollows;
 using TwitchLib.Api.Interfaces;
 using TwitchLib.Api.Services.Core.FollowerService;
 using TwitchLib.Api.Services.Events.FollowerService;
@@ -52,7 +51,7 @@ namespace TwitchLib.Api.Services
         /// <param name="queryCountPerRequest">The amount of followers to query per request.</param>
         /// <param name="cacheSize">The maximum amount of followers to cache per channel.</param>
         /// <param name="invokeEventsOnStartup">Whether to invoke the update events on startup or not.</param>
-        public FollowerService(ITwitchAPI api, int checkIntervalInSeconds = 60, int queryCountPerRequest = 100, int cacheSize = 1000, bool invokeEventsOnStartup = false) : 
+        public FollowerService(ITwitchAPI api, int checkIntervalInSeconds = 60, int queryCountPerRequest = 100, int cacheSize = 1000, bool invokeEventsOnStartup = false) :
             base(api, checkIntervalInSeconds)
         {
             if (queryCountPerRequest < 1 || queryCountPerRequest > 100)
@@ -181,7 +180,7 @@ namespace TwitchLib.Api.Services
         private async Task<List<ChannelFollower>> GetLatestFollowersAsync(string channel)
         {
             var resultset = await _monitor.GetUsersFollowsAsync(channel, QueryCountPerRequest);
-            
+
             return resultset.Data.ToList();
         }
     }

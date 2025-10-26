@@ -18,7 +18,7 @@ namespace TwitchLib.Api.Core.RateLimiter
         private SemaphoreSlim _semafore { get; } = new SemaphoreSlim(1, 1);
         private ITime _time { get; }
 
-        public CountByIntervalAwaitableConstraint(int count, TimeSpan timeSpan, ITime time=null)
+        public CountByIntervalAwaitableConstraint(int count, TimeSpan timeSpan, ITime time = null)
         {
             if (count <= 0)
                 throw new ArgumentException("count should be strictly positive", nameof(count));
@@ -50,20 +50,20 @@ namespace TwitchLib.Api.Core.RateLimiter
                 return new DisposeAction(OnEnded);
 
             var timetoWait = last.Value.Add(_timeSpan) - now;
-            try 
+            try
             {
                 await _time.GetDelay(timetoWait, cancellationToken);
             }
-            catch (Exception) 
+            catch (Exception)
             {
                 _semafore.Release();
                 throw;
-            }           
+            }
 
             return new DisposeAction(OnEnded);
         }
 
-        private void OnEnded() 
+        private void OnEnded()
         {
             var now = _time.GetTimeNow();
             _timeStamps.Push(now);

@@ -1,5 +1,5 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -130,7 +130,7 @@ namespace TwitchLib.Api.Helix
 
             var response = await TwitchDeleteAsync("/eventsub/subscriptions", ApiVersion.Helix, getParams, accessToken, clientId);
 
-            return response.Key == (int) HttpStatusCode.NoContent;
+            return response.Key == (int)HttpStatusCode.NoContent;
         }
     }
 }

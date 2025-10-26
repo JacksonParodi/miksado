@@ -46,7 +46,7 @@ namespace TwitchLib.Api.Helix
         /// <exception cref="BadParameterException"></exception>
         public Task ManageHeldAutoModMessagesAsync(string userId, string msgId, ManageHeldAutoModMessageActionEnum action, string accessToken = null)
         {
-            if(string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(msgId))
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(msgId))
                 throw new BadParameterException("userId and msgId cannot be null and must be greater than 0 length");
 
             var json = new JObject
@@ -111,7 +111,7 @@ namespace TwitchLib.Api.Helix
                 new KeyValuePair<string, string>("broadcaster_id", broadcasterId)
             };
 
-            if (userIds != null && userIds.Count > 0) 
+            if (userIds != null && userIds.Count > 0)
                 getParams.AddRange(userIds.Select(userId => new KeyValuePair<string, string>("user_id", userId)));
 
             if (string.IsNullOrWhiteSpace(after))
@@ -150,7 +150,7 @@ namespace TwitchLib.Api.Helix
                 new KeyValuePair<string, string>("first", first.ToString())
             };
 
-            if (userIds != null && userIds.Count > 0) 
+            if (userIds != null && userIds.Count > 0)
                 getParams.AddRange(userIds.Select(userId => new KeyValuePair<string, string>("user_id", userId)));
 
             if (!string.IsNullOrWhiteSpace(after))
@@ -194,7 +194,7 @@ namespace TwitchLib.Api.Helix
                 new KeyValuePair<string, string>("first", first.ToString())
             };
 
-            if (userIds != null && userIds.Count > 0) 
+            if (userIds != null && userIds.Count > 0)
                 getParams.AddRange(userIds.Select(userId => new KeyValuePair<string, string>("user_id", userId)));
 
             if (!string.IsNullOrWhiteSpace(after))
@@ -217,7 +217,7 @@ namespace TwitchLib.Api.Helix
                 new KeyValuePair<string, string>("broadcaster_id", broadcasterId)
             };
 
-            if (userIds != null && userIds.Count > 0) 
+            if (userIds != null && userIds.Count > 0)
                 getParams.AddRange(userIds.Select(userId => new KeyValuePair<string, string>("user_id", userId)));
 
             return TwitchGetGenericAsync<GetModeratorEventsResponse>("/moderation/moderators/events", ApiVersion.Helix, getParams, accessToken);
@@ -251,7 +251,7 @@ namespace TwitchLib.Api.Helix
                 throw new BadParameterException("banUserRequest.UserId must be set");
 
             if (banUserRequest.Duration.HasValue)
-                if(banUserRequest.Duration.Value <= 0 || banUserRequest.Duration.Value > 1209600)
+                if (banUserRequest.Duration.Value <= 0 || banUserRequest.Duration.Value > 1209600)
                     throw new BadParameterException("banUserRequest.Duration has to be between including 1 and including 1209600");
 
             var getParams = new List<KeyValuePair<string, string>>

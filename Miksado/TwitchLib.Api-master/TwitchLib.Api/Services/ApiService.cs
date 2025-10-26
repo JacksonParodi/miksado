@@ -107,9 +107,9 @@ namespace TwitchLib.Api.Services
 
             ChannelsToMonitor = channelsToMonitor;
 
-            OnChannelsSet?.Invoke(this, new OnChannelsSetArgs {Channels = channelsToMonitor});
+            OnChannelsSet?.Invoke(this, new OnChannelsSetArgs { Channels = channelsToMonitor });
         }
-        
+
         /// <summary>
         /// Called when the service timer ticks. Invokes the <see cref="OnServiceTick"/> event.
         /// </summary>

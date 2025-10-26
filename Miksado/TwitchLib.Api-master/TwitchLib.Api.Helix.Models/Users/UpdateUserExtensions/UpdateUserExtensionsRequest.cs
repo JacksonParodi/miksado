@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using TwitchLib.Api.Helix.Models.Users.Internal;
 
 namespace TwitchLib.Api.Helix.Models.Users.UpdateUserExtensions

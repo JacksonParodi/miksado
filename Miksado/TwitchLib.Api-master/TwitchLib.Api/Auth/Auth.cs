@@ -126,7 +126,8 @@ namespace TwitchLib.Api.Auth
             try
             {
                 return await TwitchGetGenericAsync<ValidateAccessTokenResponse>("/validate", ApiVersion.Auth, accessToken: accessToken);
-            } catch(BadScopeException)
+            }
+            catch (BadScopeException)
             {
                 // BadScopeException == 401, which is surfaced when token is invalid
                 return null;

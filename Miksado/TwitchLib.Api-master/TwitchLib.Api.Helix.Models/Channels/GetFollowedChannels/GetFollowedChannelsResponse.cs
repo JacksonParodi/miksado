@@ -12,13 +12,13 @@ namespace TwitchLib.Api.Helix.Models.Channels.GetFollowedChannels
         /// </summary>
         [JsonProperty(PropertyName = "data")]
         public FollowedChannel[] Data { get; protected set; }
-        
+
         /// <summary>
         /// Contains the information used to page through the list of results. The object is empty if there are no more pages left to page through.
         /// </summary>
         [JsonProperty(PropertyName = "pagination")]
         public Pagination Pagination { get; protected set; }
-        
+
         /// <summary>
         /// The total number of broadcasters that the user follows. As someone pages through the list, the number may change as the user follows or unfollows broadcasters.
         /// </summary>

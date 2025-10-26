@@ -36,9 +36,6 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
 
     public ApiContainer? MaybeAPIContainer { get; set; }
     private ApiContainer APIs => MaybeAPIContainer!;
-
-    //private IGameInfo? CurrentGameInfo = null;
-    //private string? CurrentGamePath = null;
     private readonly Logger.Logger Logger;
     private readonly TwitchClient TwitchClient;
     private List<MiksadoPlugin> Plugins = [];
@@ -117,7 +114,7 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
                     shufflerConfig = pc;
                 }
             }
-            ShufflerPlugin ShufflerPlugin = new(Logger, APIs, shufflerConfig);
+            ShufflerPlugin ShufflerPlugin = new(Logger, APIs, TwitchClient, shufflerConfig);
 
             Plugins = [ShufflerPlugin];
             PluginSelectCheckedListBox.Items.Clear();
@@ -206,7 +203,7 @@ public sealed class MiksadoToolForm : ToolFormBase, IExternalToolForm
     {
         await TwitchClient.OnAuthorizeButtonClicked(Logger);
 
-        Logger.Debug("token: " + TwitchClient.Token);
+        //Logger.Debug("token: " + TwitchClient.Token);
 
         await TwitchClient.ConnectAsync().ContinueWith(task =>
         {

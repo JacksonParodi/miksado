@@ -1,5 +1,5 @@
-using System.ComponentModel;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 using TwitchLib.Api.Core;
 using TwitchLib.Api.Core.HttpCallHandlers;
 using TwitchLib.Api.Core.Interfaces;

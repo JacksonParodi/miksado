@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using System.Timers;
-using Newtonsoft.Json;
 using TwitchLib.Api.Core;
 using TwitchLib.Api.Core.Enums;
 using TwitchLib.Api.Core.Interfaces;
@@ -147,14 +147,14 @@ namespace TwitchLib.Api.ThirdParty
                 if (ping.Success)
                 {
                     _pingTimer.Stop();
-                    OnUserAuthorizationDetected?.Invoke(null, new OnUserAuthorizationDetectedArgs {Id = ping.Id, Scopes = ping.Scopes, Token = ping.Token, Username = ping.Username, Refresh = ping.Refresh, ClientId = ping.ClientId });
+                    OnUserAuthorizationDetected?.Invoke(null, new OnUserAuthorizationDetectedArgs { Id = ping.Id, Scopes = ping.Scopes, Token = ping.Token, Username = ping.Username, Refresh = ping.Refresh, ClientId = ping.ClientId });
                 }
                 else
                 {
                     if (ping.Error == 3) return;
 
                     _pingTimer.Stop();
-                    OnError?.Invoke(null, new OnAuthorizationFlowErrorArgs {Error = ping.Error, Message = ping.Message});
+                    OnError?.Invoke(null, new OnAuthorizationFlowErrorArgs { Error = ping.Error, Message = ping.Message });
                 }
             }
         }

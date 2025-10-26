@@ -7,6 +7,6 @@ namespace TwitchLib.Api.Core.Interfaces
         DateTime CreatedAt { get; }
         bool Notifications { get; }
 
-        IUser User { get;  }
+        IUser User { get; }
     }
 }

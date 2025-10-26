@@ -34,7 +34,7 @@ namespace TwitchLib.Api.Helix
         /// <exception cref="BadParameterException"></exception>
         public Task<GetExtensionTransactionsResponse> GetExtensionTransactionsAsync(string extensionId, List<string> ids = null, string after = null, int first = 20, string applicationAccessToken = null)
         {
-            if(string.IsNullOrWhiteSpace(extensionId))
+            if (string.IsNullOrWhiteSpace(extensionId))
                 throw new BadParameterException("extensionId cannot be null");
 
             if (first < 1 || first > 100)

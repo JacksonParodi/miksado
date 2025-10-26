@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TwitchLib.Api.Helix.Models.Streams.GetStreams
+﻿namespace TwitchLib.Api.Helix.Models.Streams.GetStreams
 {
     /// <summary>
     /// Stream type to select when using GetStreamsAsync

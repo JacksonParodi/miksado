@@ -16,63 +16,63 @@ namespace TwitchLib.Api.Core.RateLimiter
             _ac = ac;
         }
 
-        public Task Perform(Func<Task> perform) 
+        public Task Perform(Func<Task> perform)
         {
             return Perform(perform, CancellationToken.None);
         }
 
-        public Task<T> Perform<T>(Func<Task<T>> perform) 
+        public Task<T> Perform<T>(Func<Task<T>> perform)
         {
             return Perform(perform, CancellationToken.None);
         }
 
-        public async Task Perform(Func<Task> perform, CancellationToken cancellationToken) 
+        public async Task Perform(Func<Task> perform, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            using (await _ac.WaitForReadiness(cancellationToken)) 
+            using (await _ac.WaitForReadiness(cancellationToken))
             {
                 await perform();
             }
         }
 
-        public async Task<T> Perform<T>(Func<Task<T>> perform, CancellationToken cancellationToken) 
+        public async Task<T> Perform<T>(Func<Task<T>> perform, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            using (await _ac.WaitForReadiness(cancellationToken)) 
+            using (await _ac.WaitForReadiness(cancellationToken))
             {
                 return await perform();
             }
         }
 
-        private static Func<Task> Transform(Action act) 
+        private static Func<Task> Transform(Action act)
         {
             return () => { act(); return Task.FromResult(0); };
         }
 
-        private static Func<Task<T>> Transform<T>(Func<T> compute) 
+        private static Func<Task<T>> Transform<T>(Func<T> compute)
         {
-            return () =>  Task.FromResult(compute()); 
+            return () => Task.FromResult(compute());
         }
 
-        public Task Perform(Action perform, CancellationToken cancellationToken) 
+        public Task Perform(Action perform, CancellationToken cancellationToken)
         {
-           var transformed = Transform(perform);
-           return Perform(transformed, cancellationToken);
+            var transformed = Transform(perform);
+            return Perform(transformed, cancellationToken);
         }
 
-        public Task Perform(Action perform) 
+        public Task Perform(Action perform)
         {
             var transformed = Transform(perform);
             return Perform(transformed);
         }
 
-        public Task<T> Perform<T>(Func<T> perform) 
+        public Task<T> Perform<T>(Func<T> perform)
         {
             var transformed = Transform(perform);
             return Perform(transformed);
         }
 
-        public Task<T> Perform<T>(Func<T> perform, CancellationToken cancellationToken) 
+        public Task<T> Perform<T>(Func<T> perform, CancellationToken cancellationToken)
         {
             var transformed = Transform(perform);
             return Perform(transformed, cancellationToken);

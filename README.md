@@ -22,7 +22,7 @@ game shuffles can be triggered by:
 1. download release zip or build solution
 2. highly recommended to use a fresh install of BizHawk 2.11
 3. unzip contents into BizHawk base directory
-4. run MiksadoInstaller.exe
+4. run MiksadoInstaller.exe (it's not signed yet, sorry. will probably trigger a security warning)
 5. start using miksado
     - run the created `run_miksado.bat` script in the BizHawk base directory
     - in EmuHawk, in Tools > External Tools > miksado

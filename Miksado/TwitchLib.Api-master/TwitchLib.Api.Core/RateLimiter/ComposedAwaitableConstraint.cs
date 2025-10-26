@@ -21,16 +21,16 @@ namespace TwitchLib.Api.Core.RateLimiter
         {
             await _semafore.WaitAsync(cancellationToken);
             IDisposable[] diposables;
-            try 
+            try
             {
                 diposables = await Task.WhenAll(_ac1.WaitForReadiness(cancellationToken), _ac2.WaitForReadiness(cancellationToken));
             }
-            catch (Exception) 
+            catch (Exception)
             {
                 _semafore.Release();
                 throw;
-            } 
-            return new DisposeAction(() => 
+            }
+            return new DisposeAction(() =>
             {
                 foreach (var diposable in diposables)
                 {

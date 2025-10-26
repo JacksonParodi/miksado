@@ -224,11 +224,11 @@ namespace Miksado
             this.TransportButtonFlowLayout.Size = new System.Drawing.Size(517, 55);
             this.TransportButtonFlowLayout.TabIndex = 18;
             // 
-            // StartButton
+            // StartNewButton
             // 
             this.StartNewButton.Enabled = false;
             this.StartNewButton.Location = new System.Drawing.Point(3, 3);
-            this.StartNewButton.Name = "StartButton";
+            this.StartNewButton.Name = "StartNewButton";
             this.StartNewButton.Size = new System.Drawing.Size(80, 32);
             this.StartNewButton.TabIndex = 2;
             this.StartNewButton.Text = "new";
@@ -688,6 +688,7 @@ namespace Miksado
             // 
             this.PollOption1ComboBox.FormattingEnabled = true;
             this.PollOption1ComboBox.Location = new System.Drawing.Point(3, 3);
+            this.PollOption1ComboBox.MaxDropDownItems = 64;
             this.PollOption1ComboBox.Name = "PollOption1ComboBox";
             this.PollOption1ComboBox.Size = new System.Drawing.Size(121, 21);
             this.PollOption1ComboBox.TabIndex = 1;
@@ -714,6 +715,7 @@ namespace Miksado
             // 
             this.PollOption2ComboBox.FormattingEnabled = true;
             this.PollOption2ComboBox.Location = new System.Drawing.Point(3, 3);
+            this.PollOption2ComboBox.MaxDropDownItems = 64;
             this.PollOption2ComboBox.Name = "PollOption2ComboBox";
             this.PollOption2ComboBox.Size = new System.Drawing.Size(121, 21);
             this.PollOption2ComboBox.TabIndex = 2;
@@ -749,6 +751,7 @@ namespace Miksado
             // 
             this.PollOption3ComboBox.FormattingEnabled = true;
             this.PollOption3ComboBox.Location = new System.Drawing.Point(3, 3);
+            this.PollOption3ComboBox.MaxDropDownItems = 64;
             this.PollOption3ComboBox.Name = "PollOption3ComboBox";
             this.PollOption3ComboBox.Size = new System.Drawing.Size(121, 21);
             this.PollOption3ComboBox.TabIndex = 3;
@@ -775,6 +778,7 @@ namespace Miksado
             // 
             this.PollOption4ComboBox.FormattingEnabled = true;
             this.PollOption4ComboBox.Location = new System.Drawing.Point(3, 3);
+            this.PollOption4ComboBox.MaxDropDownItems = 64;
             this.PollOption4ComboBox.Name = "PollOption4ComboBox";
             this.PollOption4ComboBox.Size = new System.Drawing.Size(121, 21);
             this.PollOption4ComboBox.TabIndex = 4;
@@ -802,8 +806,10 @@ namespace Miksado
             this.PollOption5ComboBox.FormattingEnabled = true;
             this.PollOption5ComboBox.Items.AddRange(new object[] {
             "game1",
-            "game2"});
+            "game2",
+            "gameX"});
             this.PollOption5ComboBox.Location = new System.Drawing.Point(3, 3);
+            this.PollOption5ComboBox.MaxDropDownItems = 64;
             this.PollOption5ComboBox.Name = "PollOption5ComboBox";
             this.PollOption5ComboBox.Size = new System.Drawing.Size(121, 21);
             this.PollOption5ComboBox.TabIndex = 5;

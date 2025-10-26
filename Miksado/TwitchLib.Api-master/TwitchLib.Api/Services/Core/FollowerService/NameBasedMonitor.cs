@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TwitchLib.Api.Helix.Models.Channels.GetChannelFollowers;
-using TwitchLib.Api.Helix.Models.Users.GetUserFollows;
 using TwitchLib.Api.Interfaces;
 
 namespace TwitchLib.Api.Services.Core.FollowerService

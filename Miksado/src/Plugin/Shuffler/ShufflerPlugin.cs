@@ -8,9 +8,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TwitchLib.Api.Helix.Models.Polls.CreatePoll;
 using TwitchLib.EventSub.Core.EventArgs.Channel;
+using TwitchLib.EventSub.Core.Models.Polls;
 using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
 using MConstant = Miksado.Misc.Constant;
 
@@ -38,6 +41,13 @@ namespace Miksado.Plugin.Shuffler
             set => _gameInfoMap = value;
         }
 
+        private ShufflerState _state;
+        private ShufflerState GetState() => _state;
+        private void SetState(ShufflerState newState) => _state = newState;
+        private bool IsActiveSession() => _state == ShufflerState.Active;
+        private bool IsInactive() => _state == ShufflerState.Inactive;
+        private bool IsPausedSession() => _state == ShufflerState.Paused;
+
         private IRandomNumberGenerator CurrentRng;
         private IShuffleAlgorithm CurrentShuffleAlgorithm;
         private ShuffleTrigger[] CurrentShuffleTriggers;
@@ -48,15 +58,19 @@ namespace Miksado.Plugin.Shuffler
         private DateTime lastTimerTargetTime;
         private DateTime nextTimerTargetTime;
         private DateTime lastShuffleTime;
+        private readonly Dictionary<CheckBox, ComboBox> PollOptionsMap;
+        private string? ActivePollId = null;
+        private string? ForcedNextGamePath = null;
+        private static readonly string RandomPollGameSlug = "random";
+        // keys: choice IDs, values: game full paths w/ extensions
+        private Dictionary<string, string>? ActivePollMap = null;
 
-        private ShufflerState _state;
-        private ShufflerState GetState() => _state;
-        private void SetState(ShufflerState newState) => _state = newState;
-        private bool IsActiveSession() => _state == ShufflerState.Active;
-        private bool IsInactive() => _state == ShufflerState.Inactive;
-        private bool IsPausedSession() => _state == ShufflerState.Paused;
-
-        public ShufflerPlugin(Logger.Logger logger, ApiContainer APIs, PluginConfig? pluginConfig) : base(logger, APIs, pluginConfig)
+        public ShufflerPlugin(
+            Logger.Logger logger,
+            ApiContainer APIs,
+            TwitchClient TwitchClient,
+            PluginConfig? pluginConfig
+            ) : base(logger, APIs, TwitchClient, pluginConfig)
         {
             BaseUserControl = new ShufflerUserControl();
             SetState(ShufflerState.Inactive);
@@ -65,13 +79,13 @@ namespace Miksado.Plugin.Shuffler
             switch (pluginConfig == null)
             {
                 case true:
+                    // if no provided map from config, build a new one
                     PluginConfig = new ShufflerConfig();
 
-                    // if no provided map from config, build a new one
                     // load games and states
                     string[] rawGameFiles = Directory.GetFiles(MConstant.MGameDirPath, "*", SearchOption.AllDirectories);
                     string[] allGames = [.. rawGameFiles.Where(filePath => !MConstant.InvalidGameExtensions.Contains(Path.GetExtension(filePath).ToLower()))];
-                    Logger.Debug($"found {allGames.Length} valid game files");
+                    Logger.Info($"found {allGames.Length} valid game files");
 
                     foreach (string gamePath in allGames)
                     {
@@ -109,7 +123,7 @@ namespace Miksado.Plugin.Shuffler
                         GameInfoMap[Path.GetFileNameWithoutExtension(gamePath)] = info;
                     }
 
-                    Logger.Debug($"mapped {GameInfoMap.Count} game files");
+                    Logger.Info($"mapped {GameInfoMap.Count} game files");
                     FirePluginConfigChanged();
                     break;
 
@@ -158,7 +172,6 @@ namespace Miksado.Plugin.Shuffler
 
             // setup shuffle trigger settings
             CurrentShuffleTriggers = [];
-
             UserControl.FileTouchEnableCheckBox.CheckedChanged += (s, e) =>
             {
                 switch (UserControl.FileTouchEnableCheckBox.Checked)
@@ -267,7 +280,6 @@ namespace Miksado.Plugin.Shuffler
                 UserControl.StartNewButton.Enabled = false;
                 UserControl.ResumeButton.Enabled = false;
                 UserControl.ForceShuffleButton.Enabled = false;
-                return;
             }
 
             if (GameInfoMap.Count == 1)
@@ -291,21 +303,39 @@ namespace Miksado.Plugin.Shuffler
             UserControl.PollEndButton.Click += OnPollEndButtonClick;
             UserControl.PollClearButton.Click += OnPollClearButtonClick;
 
-            ComboBox[] pollOptionComboBoxes = [
-                UserControl.PollOption1ComboBox,
-                UserControl.PollOption2ComboBox,
-                UserControl.PollOption3ComboBox,
-                UserControl.PollOption4ComboBox,
-                UserControl.PollOption5ComboBox,
-            ];
+            UserControl.PollTitleTextBox.Text = "next game?";
+            UserControl.ChannelPointVoteCostUpDown.Value = 100;
 
-            foreach (ComboBox cb in pollOptionComboBoxes)
+            PollOptionsMap = new()
             {
-                cb.Items.Clear();
-                cb.Items.AddRange([.. GameInfoMap.Values.Select(info => Path.GetFileNameWithoutExtension(info.GamePath))]);
-                cb.Items.Add("random");
-                cb.SelectedIndex = -1;
-                // continue implementing poll options later
+                { UserControl.PollOption1EnableCheckBox, UserControl.PollOption1ComboBox },
+                { UserControl.PollOption2EnableCheckBox, UserControl.PollOption2ComboBox },
+                { UserControl.PollOption3EnableCheckBox, UserControl.PollOption3ComboBox },
+                { UserControl.PollOption4EnableCheckBox, UserControl.PollOption4ComboBox },
+                { UserControl.PollOption5EnableCheckBox, UserControl.PollOption5ComboBox },
+            };
+
+            foreach (var kv in PollOptionsMap)
+            {
+                CheckBox checkBox = kv.Key;
+                ComboBox comboBox = kv.Value;
+
+                comboBox.BeginUpdate();
+
+                checkBox.CheckedChanged += (s, e) =>
+                {
+                    comboBox.Enabled = checkBox.Checked;
+                    UpdateUI();
+                };
+
+                comboBox.Items.Clear();
+                comboBox.Items.AddRange([.. GameInfoMap.Values.Select(info => Path.GetFileNameWithoutExtension(info.GamePath))]);
+                comboBox.Items.Add(RandomPollGameSlug);
+                comboBox.Enabled = checkBox.Checked;
+
+                checkBox.Checked = false;
+
+                comboBox.EndUpdate();
             }
 
             UpdateUI();
@@ -337,10 +367,6 @@ namespace Miksado.Plugin.Shuffler
             {
                 IsShuffling = true;
 
-                // TODO: way to force a certain game to shuffle, from the poll
-                // I don't want to call OpenRom from anywhere else
-                // I'd rather modify the logic to force a certain next game
-
                 // if we have a current playing game, save the state for it
                 if (APIs.Emulation.GetGameInfo != null && CurrentGamePath != null)
                 {
@@ -364,7 +390,16 @@ namespace Miksado.Plugin.Shuffler
 
                 while (!shuffleSuccessful)
                 {
-                    nextGamePath = CurrentShuffleAlgorithm.NextGamePath(CurrentRng, availableGamePaths, CurrentGamePath);
+                    if (ForcedNextGamePath != null)
+                    {
+                        nextGamePath = ForcedNextGamePath;
+                        Logger.Debug($"forcing next game path: {nextGamePath}");
+                    }
+                    else
+                    {
+                        nextGamePath = CurrentShuffleAlgorithm.NextGamePath(CurrentRng, availableGamePaths, CurrentGamePath);
+                    }
+
                     Logger.Debug($"next game path: {nextGamePath}");
                     shuffleSuccessful = APIs.EmuClient.OpenRom(nextGamePath);
 
@@ -389,7 +424,6 @@ namespace Miksado.Plugin.Shuffler
                         bool _loadSaveStateSuccessful = APIs.SaveState.Load(saveStatePath);
                     }
                 }
-
                 else
                 {
                     Logger.Debug("no save state found for this game, starting fresh");
@@ -436,8 +470,8 @@ namespace Miksado.Plugin.Shuffler
                 }
             }
 
+            ForcedNextGamePath = null;
             IsShuffling = false;
-
             SaveShufflerConfig();
         }
 
@@ -540,10 +574,35 @@ namespace Miksado.Plugin.Shuffler
             UserControl.TwitchSubTierComboBox.Enabled = !IsActiveSession();
 
             // UI logic for poll active/inactive
-            // blank buttons for now
-            UserControl.PollSendButton.Enabled = false;
-            UserControl.PollEndButton.Enabled = false;
-            UserControl.PollClearButton.Enabled = false;
+            int enabledPollOptions = PollOptionsMap.Keys.Count(cb => cb.Checked);
+            switch (enabledPollOptions > 1)
+            {
+                case true:
+                    if (!TwitchClient.IsConnected() || ActivePollId != null)
+                    {
+                        UserControl.PollSendButton.Enabled = false;
+                    }
+                    else
+                    {
+                        UserControl.PollSendButton.Enabled = IsActiveSession();
+                    }
+
+                    break;
+                case false:
+                    UserControl.PollSendButton.Enabled = false;
+                    break;
+            }
+
+            if (ActivePollId != null)
+            {
+                UserControl.PollEndButton.Enabled = IsActiveSession();
+                UserControl.PollClearButton.Enabled = IsActiveSession();
+            }
+            else
+            {
+                UserControl.PollEndButton.Enabled = false;
+                UserControl.PollClearButton.Enabled = false;
+            }
 
             UserControl.TwitchBitsEnableCheckBox.Enabled = !IsActiveSession();
             UserControl.TwitchBitsMinimumUpDown.Enabled = !IsActiveSession();
@@ -938,11 +997,9 @@ namespace Miksado.Plugin.Shuffler
 
             if (usedAmount >= triggerAmount)
             {
-                //Logger.Info($"bits used: {usedAmount} (trigger: {triggerAmount})");
                 Logger.Info($"{bitsUser} used {usedAmount} bits (trigger: {triggerAmount}), shuffling!");
                 Logger.Debug("Setting ShouldShuffle = true due to bits threshold met");
                 ShouldShuffle = true;
-
             }
             else
             {
@@ -954,16 +1011,63 @@ namespace Miksado.Plugin.Shuffler
             await Task.CompletedTask;
         }
 
-        async public override Task OnPollEnd(ChannelPollEndArgs e)
+        public override async Task OnPollEnd(ChannelPollEndArgs e)
         {
+            string completedPollId = e.Payload.Event.Id;
+            Logger.Debug($"poll ended with id: {completedPollId}");
+
             if (!IsActiveSession() || !Enabled)
             {
                 await Task.CompletedTask;
                 return;
             }
 
-            Logger.Debug("OnPollEnd called");
+            if (ActivePollMap == null)
+            {
+                Logger.Debug("no active poll map, cannot process poll end");
+                await Task.CompletedTask;
+                return;
+            }
+
+            PollChoice winningChoice = new()
+            {
+                Votes = -1,
+            };
+            foreach (PollChoice choice in e.Payload.Event.Choices)
+            {
+                if (choice.Votes > winningChoice.Votes)
+                {
+                    winningChoice = choice;
+                }
+            }
+
+            Logger.Info($"poll ended, winning choice: {winningChoice.Title} with {winningChoice.Votes} votes");
+
+            string winningChoiceId = winningChoice.Id;
+            string winningGamePath = ActivePollMap.ContainsKey(winningChoiceId) ? ActivePollMap[winningChoiceId] : "";
+
+            //string winningGamePath = GameInfoMap.Values
+            //    .Where(info => Path.GetFileNameWithoutExtension(info.GamePath) == winningChoice.Title)
+            //    .Select(info => info.GamePath)
+            //    .FirstOrDefault() ?? "";
+
+            if (winningGamePath != "" && completedPollId == ActivePollId)
+            {
+                Logger.Info($"shuffling to winning game: {winningChoice.Title}");
+                ForcedNextGamePath = winningGamePath;
+                ShouldShuffle = true;
+                // TODO: add timer to clear ActivePollId after some delay in case of hung or invalid poll
+                ActivePollId = null;
+            }
+            else
+            {
+                Logger.Info("winning choice does not correspond to a valid game, not shuffling");
+            }
+
+            UpdateUI();
             await Task.CompletedTask;
+            return;
+            //await Task.CompletedTask;
         }
 
         private void OnPollClearButtonClick(object sender, EventArgs e)
@@ -976,9 +1080,164 @@ namespace Miksado.Plugin.Shuffler
             return;
         }
 
-        private void OnPollSendButtonClick(object sender, EventArgs e)
+        private async void OnPollSendButtonClick(object sender, EventArgs e)
         {
-            return;
+            Choice[] choices = [];
+
+            foreach (var kv in PollOptionsMap)
+            {
+                CheckBox checkBox = kv.Key;
+                ComboBox comboBox = kv.Value;
+
+                if (checkBox.Checked && comboBox.Enabled)
+                {
+                    Choice thisChoice = new() { Title = comboBox.SelectedItem as string ?? "" };
+
+                    if (
+                        thisChoice.Title != "" &&
+                        thisChoice.Title.Length > 0 &&
+                        !choices.Any((c) => c.Title == thisChoice.Title && thisChoice.Title != RandomPollGameSlug))
+                    {
+                        choices = [.. choices, thisChoice];
+                    }
+                }
+            }
+
+            if (choices.Any((c) => c.Title == RandomPollGameSlug))
+            {
+                foreach (Choice c in choices)
+                {
+                    if (c.Title == RandomPollGameSlug)
+                    {
+                        List<string> availableGames = [.. GameInfoMap.Values.Where(info => !info.IsCompleted).Select(info => Path.GetFileNameWithoutExtension(info.GamePath))];
+                        if (availableGames.Count == 0)
+                        {
+                            Logger.Info("no available games to add for random poll option");
+                            MessageBox.Show("no available games to add for random poll option", "cannot create poll", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
+                        int retryMax = 16;
+                        int retryCount = 0;
+                        bool searching = true;
+                        while (searching && retryCount < retryMax)
+                        {
+                            int r = CurrentRng.Next();
+                            string candidateGame = availableGames[r % availableGames.Count];
+
+                            if (!choices.Any((choice) => choice.Title == candidateGame))
+                            {
+                                c.Title = candidateGame;
+                                searching = false;
+                            }
+                            retryCount++;
+                        }
+
+                        if (searching)
+                        {
+                            Logger.Info("failed to select unique game for random poll option");
+                        }
+                    }
+                }
+            }
+
+            if (choices.Any((c) => c.Title == RandomPollGameSlug))
+            {
+                choices = [.. choices.Where(c => c.Title != RandomPollGameSlug)];
+            }
+
+            string[] reqChoicePaths = [];
+            int choiceTitleMaxLength = 25;
+
+            foreach (Choice c in choices)
+            {
+                string fullTitle = c.Title;
+
+                c.Title = Regex.Replace(c.Title, @"\([^)]*\)", "");
+                c.Title = Regex.Replace(c.Title, @"\s+", " ").Trim();
+
+                if (c.Title.Length > choiceTitleMaxLength)
+                {
+                    c.Title = Regex.Replace(c.Title, @"\s+", "");
+                }
+
+                if (c.Title.Length > choiceTitleMaxLength)
+                {
+                    List<string> filterWords = ["and", "the", "of", "in", "a", "to", "for", "on", "with", "at"];
+                    filterWords.AddRange(["by", "an", "be", "is", "it", "as", "from", "that", "this"]);
+
+                    foreach (string word in filterWords)
+                    {
+                        c.Title = Regex.Replace(c.Title, $@"\b{word}\b", "", RegexOptions.IgnoreCase).Trim();
+                        if (c.Title.Length <= choiceTitleMaxLength)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (c.Title.Length > choiceTitleMaxLength)
+                {
+                    c.Title = c.Title[..choiceTitleMaxLength].Trim();
+                }
+
+                reqChoicePaths = [.. reqChoicePaths, GameInfoMap[fullTitle].GamePath];
+            }
+
+            if (choices.Length < 2)
+            {
+                Logger.Info("need at least two poll options to create poll");
+                MessageBox.Show("please enable and select at least two poll options", "cannot create poll", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (choices.Length > 5)
+            {
+                Logger.Info("cannot have more than five poll options");
+                MessageBox.Show("cannot have more than five poll options", "cannot create poll", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            Logger.Debug($"Twitch ID passed: {TwitchClient.TwitchId}");
+            Logger.Debug($"Twitch token is null: {TwitchClient.Token == null}");
+
+            Logger.Debug("printing poll choices:");
+            foreach (Choice choice in choices)
+            {
+                Logger.Debug($"- {choice.Title}");
+            }
+
+            CreatePollRequest req = new()
+            {
+                BroadcasterId = TwitchClient.TwitchId,
+                Title = UserControl.PollTitleTextBox.Text,
+                Choices = choices,
+                ChannelPointsVotingEnabled = UserControl.ChannelPointVotingEnableCheckBox.Enabled,
+                ChannelPointsPerVote = (int)UserControl.ChannelPointVoteCostUpDown.Value,
+                DurationSeconds = (int)UserControl.PollDurationUpDown.Value,
+            };
+
+            try
+            {
+                CreatePollResponse res = await TwitchClient.TwitchApi.Helix.Polls.CreatePollAsync(req, TwitchClient.Token);
+                TwitchLib.Api.Helix.Models.Polls.Choice[] resChoices = res.Data[0].Choices;
+
+                ActivePollMap = [];
+                for (int i = 0; i < resChoices.Length; i++)
+                {
+                    TwitchLib.Api.Helix.Models.Polls.Choice rc = resChoices[i];
+                    ActivePollMap.Add(rc.Id, reqChoicePaths[i]);
+                }
+
+                ActivePollId = res.Data[0].Id;
+                Logger.Debug($"created poll with id: {ActivePollId}");
+                UpdateUI();
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug($"error creating poll: {ex.Message}");
+            }
         }
 
         private void OnGameFinishButtonClick(object sender, EventArgs e)

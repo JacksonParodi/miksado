@@ -6,6 +6,6 @@ namespace TwitchLib.Api.Helix.Models.Moderation.BanUser
     {
         public string UserId;
         public string Reason;
-        public TimeSpan Duration; 
+        public TimeSpan Duration;
     }
 }

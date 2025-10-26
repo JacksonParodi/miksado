@@ -28,6 +28,6 @@ namespace TwitchLib.Api.Helix.Models.Predictions
         [JsonProperty(PropertyName = "ended_at")]
         public string EndedAt { get; protected set; }
         [JsonProperty(PropertyName = "locked_at")]
-        public string LockedAt { get; protected set; }        
+        public string LockedAt { get; protected set; }
     }
 }

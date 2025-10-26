@@ -1,7 +1,7 @@
 ﻿using TwitchLib.Api.Core.Enums;
 
 namespace TwitchLib.Api.Helix.Models.Users.Internal
-{ 
+{
     public class ExtensionSlot
     {
         public ExtensionType Type;

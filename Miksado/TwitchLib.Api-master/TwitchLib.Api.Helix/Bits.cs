@@ -13,7 +13,7 @@ namespace TwitchLib.Api.Helix
     /// <summary>
     /// Bits related APIs
     /// </summary>
-    public class Bits :ApiBase
+    public class Bits : ApiBase
     {
         public Bits(IApiSettings settings, IRateLimiter rateLimiter, IHttpCallHandler http) : base(settings, rateLimiter, http)
         {

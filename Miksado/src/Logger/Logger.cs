@@ -12,7 +12,7 @@ namespace Miksado.Logger
         }
 
         private readonly TextBox _console;
-        public LogLevel CurrentLogLevel { get; set; } = LogLevel.Debug;
+        public LogLevel CurrentLogLevel { get; set; } = LogLevel.Info;
 
 
         public Logger(TextBox console)

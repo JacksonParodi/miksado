@@ -6,7 +6,7 @@ namespace TwitchLib.Api.Core.Models.Undocumented.Chatters
     public class ChatterFormatted
     {
         public string Username { get; protected set; }
-        public UserType UserType { get;  set; }
+        public UserType UserType { get; set; }
 
         public ChatterFormatted(string username, UserType userType)
         {
@@ -14,6 +14,6 @@ namespace TwitchLib.Api.Core.Models.Undocumented.Chatters
             UserType = userType;
         }
 
-        
+
     }
 }

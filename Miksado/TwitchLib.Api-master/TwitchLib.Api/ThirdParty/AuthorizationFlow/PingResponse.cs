@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 using TwitchLib.Api.Core.Enums;
 
 namespace TwitchLib.Api.ThirdParty.AuthorizationFlow
@@ -23,11 +23,12 @@ namespace TwitchLib.Api.ThirdParty.AuthorizationFlow
         {
             var json = JObject.Parse(jsonStr);
             Success = bool.Parse(json.SelectToken("success").ToString());
-            if(!Success)
+            if (!Success)
             {
                 Error = int.Parse(json.SelectToken("error").ToString());
                 Message = json.SelectToken("message").ToString();
-            } else
+            }
+            else
             {
                 Scopes = new List<AuthScopes>();
                 foreach (var scope in json.SelectToken("scopes"))

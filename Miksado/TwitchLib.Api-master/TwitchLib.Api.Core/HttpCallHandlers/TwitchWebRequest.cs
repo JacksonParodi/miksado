@@ -1,9 +1,9 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using TwitchLib.Api.Core.Common;
 using TwitchLib.Api.Core.Enums;
 using TwitchLib.Api.Core.Exceptions;
@@ -53,7 +53,7 @@ namespace TwitchLib.Api.Core.HttpCallHandlers
             {
                 request.Headers["Client-ID"] = clientId;
             }
-           
+
 
             request.Method = method;
             request.ContentType = "application/json";
@@ -71,7 +71,7 @@ namespace TwitchLib.Api.Core.HttpCallHandlers
 
             if (!string.IsNullOrEmpty(accessToken))
                 request.Headers["Authorization"] = $"{authPrefix} {Helpers.FormatOAuth(accessToken)}";
-            
+
 
             if (payload != null)
                 using (var writer = new StreamWriter(await request.GetRequestStreamAsync().ConfigureAwait(false)))
@@ -124,7 +124,7 @@ namespace TwitchLib.Api.Core.HttpCallHandlers
                     throw new BadRequestException("Your request failed because either: \n 1. Your ClientID was invalid/not set. \n 2. Your refresh token was invalid. \n 3. You requested a username when the server was expecting a user ID.", null);
                 case HttpStatusCode.Unauthorized:
                     var authenticateHeader = errorResp.Headers.GetValues("WWW-Authenticate");
-                    if (authenticateHeader?.Length ==0 || string.IsNullOrEmpty(authenticateHeader?[0]))
+                    if (authenticateHeader?.Length == 0 || string.IsNullOrEmpty(authenticateHeader?[0]))
                         throw new BadScopeException("Your request was blocked due to bad credentials (do you have the right scope for your access token?).", null);
 
                     var invalidTokenFound = authenticateHeader[0].Contains("error='invalid_token'");

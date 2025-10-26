@@ -74,22 +74,22 @@ namespace TwitchLib.Api.Helix
                 new KeyValuePair<string, string>("first", first.ToString())
             };
 
-            if(!string.IsNullOrWhiteSpace(id))
+            if (!string.IsNullOrWhiteSpace(id))
             {
                 getParams.Add(new KeyValuePair<string, string>("id", id));
             }
 
-            if(!string.IsNullOrWhiteSpace(userId))
+            if (!string.IsNullOrWhiteSpace(userId))
             {
                 getParams.Add(new KeyValuePair<string, string>("user_id", userId));
             }
 
-            if(!string.IsNullOrWhiteSpace(gameId))
+            if (!string.IsNullOrWhiteSpace(gameId))
             {
                 getParams.Add(new KeyValuePair<string, string>("game_id", gameId));
             }
 
-            if(!string.IsNullOrWhiteSpace(after))
+            if (!string.IsNullOrWhiteSpace(after))
             {
                 getParams.Add(new KeyValuePair<string, string>("after", after));
             }

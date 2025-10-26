@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using TwitchLib.Api.Core.Enums;
 using TwitchLib.Api.Core.Exceptions;
 using TwitchLib.Api.Core.Interfaces;
@@ -27,7 +27,7 @@ namespace TwitchLib.Api.Core
 
         public ApiBase(IApiSettings settings, IRateLimiter rateLimiter, IHttpCallHandler http)
         {
-            Settings = settings; 
+            Settings = settings;
             _rateLimiter = rateLimiter;
             _http = http;
             _jsonSerializer = new TwitchLibJsonSerializer();
